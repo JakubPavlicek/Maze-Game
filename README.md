@@ -1,1 +1,3 @@
-# Maze-Game
+# Maze Game
+
+Vítejte v mojí hře
