@@ -16,7 +16,9 @@ void renderScene(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glLoadIdentity();
 
+	gluOrtho2D(0.0, 400, 0.0, 400);
 	glColor3f(0, 0.8, 0);
+
 	glBegin(GL_QUADS);
 	glVertex2f(10 + posX, 9 + posY);
 	glVertex2f(20 + posX, 9 + posY);
@@ -99,7 +101,6 @@ int main(int argc, char** argv)
 	glutReshapeFunc(resizeScene);
 
 	glutKeyboardFunc(bad_key_callback);
-	gluOrtho2D(0.0, 400, 0.0, 400);
 	glutSpecialFunc(key_callback);
 
 	glutMainLoop();
