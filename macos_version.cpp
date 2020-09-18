@@ -99,10 +99,6 @@ int main(void)
         /* Make the window's context current */
         glfwMakeContextCurrent(window);
         
-        // start GLEW extension handler
-        glewExperimental = GL_TRUE;
-        glewInit();
-        
         // get version info
         const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
         const GLubyte* version = glGetString(GL_VERSION); // version as a string
