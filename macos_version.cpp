@@ -135,6 +135,9 @@ int main(void)
         glVertex2f(0.9f, 0.9f);
         glEnd();
         
+        if(posX >= 1.8 && posY >= 1.8)
+            exit(0);
+        
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
