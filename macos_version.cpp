@@ -3,13 +3,30 @@
 
 #include <iostream>
 #include <cstdio>
+#include <utility>
 
 float posX = 0, posY = 0;
 
 int WIDTH = 640, HEIGHT = 480;
 
+std::pair<int, int> DisableWindowAwayPos()
+{
+    if(posX < 0)
+        posX = 0;
+    if(posX > 1.9)
+        posX = 1.9;
+    if(posY < 0)
+        posY = 0;
+    if(posY > 1.9)
+        posY = 1.9;
+
+    return { posX, posY };
+}
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    DisableWindowAwayPos();
+
     switch(key)
     {
     default:
@@ -78,18 +95,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-int main(void)
+int main()
 {
     GLFWwindow* window;
-    
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
     /* Initialize the library */
     if (!glfwInit())
         return -1;
+    
+//    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+//    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(WIDTH, HEIGHT, "Maze Game", NULL, NULL);
@@ -98,9 +115,12 @@ int main(void)
         glfwTerminate();
         return -1;
     }
-
+    
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    
+    glewExperimental = GL_TRUE;
+    glewInit();
     
     // get version info
     const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
@@ -148,20 +168,21 @@ int main(void)
 //        glVertex2f(-0.6, 0);
 //        glVertex2f(-0.6, 1);
 //        glEnd();
-//
-//        glLineWidth(5);
-//        glBegin(GL_LINES);
-//        glVertex2f(0, -0.5);
-//        glVertex2f(1, -0.5);
-//        glEnd();
+
+        glLineWidth(5);
+        glBegin(GL_LINES);
+        glVertex2f(0, -0.5);
+        glVertex2f(1, -0.5);
+        glEnd();
+        if(posX >= 0.95f && posX <= 1.95f && posY >= 0.45f && posY <= 0.5f)
+            std::cout << "PROHRAL SI" << std::endl;
+        
         
         glLineWidth(5);
         glBegin(GL_LINES);
         glVertex2f(-1, -0.3);
         glVertex2f(0, -0.3);
         glEnd();
-        
-        // Lose
         if(posX >= -0.1f && posX <= 1.0f && posY >= 0.65f && posY <= 0.7f)
             std::cout << "PROHRAL SI" << std::endl;
         
@@ -180,3 +201,4 @@ int main(void)
     
     return 0;
 }
+
