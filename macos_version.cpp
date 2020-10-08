@@ -4,15 +4,14 @@
 #include <iostream>
 #include <cstdio>
 #include <utility>
-#include <string.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-float posX = 0, posY = 0;
+static float posX = 0, posY = 0;
 
-int WIDTH = 640, HEIGHT = 480;
+static int WIDTH = 640, HEIGHT = 480;
 
 std::pair<int, int> DisableWindowAwayPos()
 {
@@ -112,6 +111,13 @@ int main()
     if ( error )
     {
         std::cout << "Error occured during FT initialisation" << std::endl;
+    }
+    
+    FT_Face face;
+    if (FT_New_Face(library, "/System/Library/Fonts/Helvetica.ttc", 0, &face))
+    {
+        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        return -1;
     }
     
     GLFWwindow* window;
