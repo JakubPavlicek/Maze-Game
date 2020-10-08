@@ -4,6 +4,11 @@
 #include <iostream>
 #include <cstdio>
 #include <utility>
+#include <string.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_GLYPH_H
 
 float posX = 0, posY = 0;
 
@@ -95,8 +100,20 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
+// FREETYPE
+
+// END OF FREETYPE
+
 int main()
 {
+    FT_Library  library;
+
+    FT_Error error = FT_Init_FreeType( &library );
+    if ( error )
+    {
+        std::cout << "Error occured during FT initialisation" << std::endl;
+    }
+    
     GLFWwindow* window;
     
     /* Initialize the library */
@@ -187,8 +204,19 @@ int main()
             std::cout << "PROHRAL SI" << std::endl;
         
         // Win
-        if(posX >= 1.8 && posY >= 1.8)
-            exit(0);
+        if(posX >= 1.8f && posY >= 1.8f)
+        {
+            bool erase_loop = false;
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            erase_loop = true;
+            while(erase_loop)
+            {
+                posX = 2;
+                posY = 2;
+                erase_loop = false;
+            }
+            // tady napsat "YOU WIN"
+        }
         
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
