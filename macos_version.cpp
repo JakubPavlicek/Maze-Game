@@ -1,16 +1,23 @@
+#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <cstdio>
 #include <utility>
 #include <map>
+#include <fstream>
+#include <sstream>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 //#include FT_GLYPH_H
 
 #include "glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 static float posX = 0, posY = 0;
 
@@ -102,29 +109,94 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-struct Character
+struct ShaderProgramSource
 {
-    unsigned int TextureID; // ID handle of the glyph texture
-    glm::ivec2 Size;        // Size of glyph
-    glm::ivec2 Bearing;     // Offset from baseline to left/top glyph
-    unsigned int Advance;   // Offset to advance to next glyph
+    std::string VertexSource;
+    std::string FragmentSource;
 };
+
+static ShaderProgramSource ParseShader(const std::string& filepath)
+{
+    std::ifstream stream(filepath);
+    
+    enum class ShaderType
+    {
+        NONE = -1, VERTEX = 0, FRAGMENT = 1
+    };
+    
+    std::string line;
+    std::stringstream ss[2];
+    ShaderType type = ShaderType::NONE;
+    while(getline(stream, line))
+    {
+        if(line.find("#shader") != std::string::npos)
+        {
+            if(line.find("vertex") != std::string::npos)
+                type = ShaderType::VERTEX;
+            else if(line.find("fragment") != std::string::npos)
+                type = ShaderType::FRAGMENT;
+        }
+        else
+        {
+            ss[(int)type] << line << '\n';
+        }
+    }
+    
+    return { ss[0].str(), ss[1].str() };
+}
+
+static unsigned int CompileShader(unsigned int type, const std::string& source)
+{
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &src, nullptr);
+    glCompileShader(id);
+    
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+    if(result == GL_FALSE)
+    {
+        int length;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+        char message[length];
+        glGetShaderInfoLog(id, length, &length, message);
+        std::cout << "Failed to coompile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader: " << std::endl;
+        std::cout << message << std::endl;
+        glDeleteShader(id);
+        return 0;
+    }
+    
+    return id;
+}
+
+static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
+{
+    unsigned int program = glCreateProgram();
+    unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
+    unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
+    
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    glValidateProgram(program);
+    
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    
+    return program;
+}
 
 int main()
 {
-    GLFWwindow* window;
+    glfwInit();
     
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-//    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-//    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(WIDTH, HEIGHT, "Maze Game", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Maze Game", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -135,9 +207,14 @@ int main()
     glfwMakeContextCurrent(window);
     
     glewExperimental = GL_TRUE;
-    glewInit();
-
+    if(glewInit() != GLEW_OK)
+    {
+        std::cout << "Failed to initialize GLEW" << std::endl;
+        return -1;
+    }
+    
 // FREETYPE
+    
     FT_Library ft;
 
     FT_Error error = FT_Init_FreeType( &ft );
@@ -161,69 +238,78 @@ int main()
         return -1;
     }
     
-    std::map<char, Character> Characters;
-    
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
-    
-    for(unsigned int i = 0; i < 128; i++)
-    {
-        // load character glyph
-        if(FT_Load_Char(face, i, FT_LOAD_RENDER))
-        {
-            std::cout << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
-            continue;
-        }
-        
-        // generate texture
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RED,
-            face->glyph->bitmap.width,
-            face->glyph->bitmap.rows,
-            0,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            face->glyph->bitmap.buffer
-        );
-        // set texture options
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // now store character for later use
-        Character character = {
-            texture,
-            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-            (unsigned int)face->glyph->advance.x
-        };
-        Characters.insert(std::pair<char, Character>(i, character));
-    }
-    
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
+    
 // END OF FREETYPE
     
     // get version info
     const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
     const GLubyte* version = glGetString(GL_VERSION); // version as a string
+    const GLubyte* shading_language = glGetString(GL_SHADING_LANGUAGE_VERSION); // version as a string
+
     printf("Renderer: %s\n", renderer);
     printf("OpenGL version supported %s\n", version);
+    printf("Supported GLSL version is %s.\n", shading_language);
+    //
     
     glfwSetKeyCallback(window, key_callback);
     
+    float game_triangles[] = {
+        -1.0f, -0.9f,
+        -1.0f, -1.0f,
+        -0.9f, -1.0f,
+        -0.9f, -0.9f,
+         1.0f,  0.9f,
+         1.0f,  1.0f,
+         0.9f,  1.0f,
+         0.9f,  0.9f
+    };
+    
+    unsigned int indices[] = {
+        // player triangle
+        0, 1, 2,
+        2, 3, 0,
+        // destination triangle
+        4, 5, 6,
+        6, 7, 4
+    };
+    
+    unsigned int vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    
+    unsigned int vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, 8 * 2 * sizeof(float), game_triangles, GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+//    glEnableVertexAttribArray(1);
+//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float)));
+    
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    ShaderProgramSource source = ParseShader("OpenGL_tutorial/basic.shader");
+    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+    glUseProgram(shader);
+     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(0.3f, 0.3f, 0.3f, 1);
+        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
+//        glDrawArrays(GL_TRIANGLES, 6, 6);
         
         // player's GL_QUADS
         glColor3f(0, 0.8, 0);
@@ -296,7 +382,8 @@ int main()
         glfwPollEvents();
     }
 
-    glfwTerminate();
+    glDeleteProgram(shader);
     
+    glfwTerminate();
     return 0;
 }
