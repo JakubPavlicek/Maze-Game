@@ -19,6 +19,11 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#define ASSERT(x) if (!(x)) __builtin_trap();
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
 static float posX = 0, posY = 0;
 
 static int WIDTH = 640, HEIGHT = 480;
@@ -107,6 +112,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
     break;
     }
+}
+
+static void GLClearError()
+{
+    while(glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line )
+{
+    while(GLenum error = glGetError())
+    {
+        std::cout << "[OpenGL error] (" << error << "): \nFUNCTION: " << function << "\nFILE: " << file << " \nLINE: " << line << std::endl;
+        return false;
+    }
+    return true;
 }
 
 struct ShaderProgramSource
@@ -275,31 +295,41 @@ int main()
         6, 7, 4
     };
     
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 8 * 2 * sizeof(float), game_triangles, GL_STATIC_DRAW);
-    
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-//    glEnableVertexAttribArray(1);
-//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float)));
-    
     unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    GLCall(glGenBuffers(1, &ibo));
+    
+    unsigned int vao1, vao2;
+    GLCall(glGenVertexArrays(1, &vao1));
+    GLCall(glGenVertexArrays(1, &vao2));
+
+    unsigned int vbo;
+    GLCall(glGenBuffers(1, &vbo));
+    
+    GLCall(glBindVertexArray(vao1));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * 2 * sizeof(float), game_triangles, GL_STATIC_DRAW));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
+    GLCall(glEnableVertexAttribArray(0));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+
+    GLCall(glBindVertexArray(vao2));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * 2 * sizeof(float), game_triangles, GL_STATIC_DRAW));
+    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
+    GLCall(glEnableVertexAttribArray(1));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
     ShaderProgramSource source = ParseShader("OpenGL_tutorial/basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    glUseProgram(shader);
+    GLCall(glUseProgram(shader));
      
+    int location = glGetUniformLocation(shader, "u_Color");
+    ASSERT(location != -1);
+    
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -307,59 +337,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
-//        glDrawArrays(GL_TRIANGLES, 6, 6);
-        
-        // player's GL_QUADS
-        glColor3f(0, 0.8, 0);
-        glBegin(GL_QUADS);
-        glVertex2f(-1.0f + posX, -0.9f + posY);
-        glVertex2f(-0.9f + posX, -0.9f + posY);
-        glVertex2f(-0.9f + posX, -1.0f + posY);
-        glVertex2f(-1.0f + posX, -1.0f + posY);
-        glEnd();
-        
-        // end's GL_QUADS
-        glColor3f(1, 0, 0);
-        glBegin(GL_QUADS);
-        glVertex2f(0.9f, 1.0f);
-        glVertex2f(1.0f, 1.0f);
-        glVertex2f(1.0f, 0.9f);
-        glVertex2f(0.9f, 0.9f);
-        glEnd();
-        
-        // walls
-        glColor3f(1,1,1);
-//        glLineWidth(5);
-//        glBegin(GL_LINES);
-//        glVertex2f(-0.2, 0);
-//        glVertex2f(-0.2, 1);
-//        glEnd();
-//
-//        glLineWidth(5);
-//        glBegin(GL_LINES);
-//        glVertex2f(-0.6, 0);
-//        glVertex2f(-0.6, 1);
-//        glEnd();
+        glBindVertexArray(vao1);
+        GLCall(glUniform4f(location, 0.0f, 1.0f, 0.0f, 1.0f));
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        glBindVertexArray(vao2);
+        GLCall(glUniform4f(location, 1.0f, 0.0f, 0.0f, 1.0f));
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
-        glLineWidth(5);
-        glBegin(GL_LINES);
-        glVertex2f(0, -0.5);
-        glVertex2f(1, -0.5);
-        glEnd();
-        if(posX >= 0.95f && posX <= 1.95f && posY >= 0.45f && posY <= 0.5f)
-            std::cout << "PROHRAL SI" << std::endl;
-        
-        
-        glLineWidth(5);
-        glBegin(GL_LINES);
-        glVertex2f(-1, -0.3);
-        glVertex2f(0, -0.3);
-        glEnd();
-        if(posX >= -0.1f && posX <= 1.0f && posY >= 0.65f && posY <= 0.7f)
-            std::cout << "PROHRAL SI" << std::endl;
-        
         // Win
         if(posX >= 1.8f && posY >= 1.8f)
         {
