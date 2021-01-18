@@ -309,19 +309,21 @@ int main()
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
     GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * 2 * sizeof(float), game_triangles, GL_STATIC_DRAW));
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
+//    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
     GLCall(glEnableVertexAttribArray(0));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
-
-    GLCall(glBindVertexArray(vao2));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * 2 * sizeof(float), game_triangles, GL_STATIC_DRAW));
-    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
-    GLCall(glEnableVertexAttribArray(1));
+//    GLCall(glEnableVertexAttribArray(1));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
     GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
     
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GLCall(glBindVertexArray(vao2));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * 2 * sizeof(float), game_triangles, GL_STATIC_DRAW));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
+//    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
+    GLCall(glEnableVertexAttribArray(0));
+//    GLCall(glEnableVertexAttribArray(1));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
     
     ShaderProgramSource source = ParseShader("OpenGL_tutorial/basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
