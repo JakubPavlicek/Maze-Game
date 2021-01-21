@@ -15,14 +15,15 @@
 #include FT_FREETYPE_H
 //#include FT_GLYPH_H
 
+#include "Renderer.h"
+
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "VertexArray.h"
+
 #include "glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
-
-#define ASSERT(x) if (!(x)) __builtin_trap();
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 
 static float posX = 0, posY = 0;
 
@@ -112,21 +113,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
     break;
     }
-}
-
-static void GLClearError()
-{
-    while(glGetError() != GL_NO_ERROR);
-}
-
-static bool GLLogCall(const char* function, const char* file, int line )
-{
-    while(GLenum error = glGetError())
-    {
-        std::cout << "[OpenGL error] (" << error << "): \nFUNCTION: " << function << "\nFILE: " << file << " \nLINE: " << line << std::endl;
-        return false;
-    }
-    return true;
 }
 
 struct ShaderProgramSource
@@ -274,16 +260,19 @@ int main()
     //
     
     glfwSetKeyCallback(window, key_callback);
-    
-    float game_triangles[] = {
+    {
+    float player_triangles[] = {
         -1.0f, -0.9f,
         -1.0f, -1.0f,
         -0.9f, -1.0f,
-        -0.9f, -0.9f,
-         1.0f,  0.9f,
-         1.0f,  1.0f,
-         0.9f,  1.0f,
-         0.9f,  0.9f
+        -0.9f, -0.9f
+    };
+        
+    float end_triangles[] = {
+        1.0f,  0.9f,
+        1.0f,  1.0f,
+        0.9f,  1.0f,
+        0.9f,  0.9f
     };
     
     unsigned int indices[] = {
@@ -294,36 +283,40 @@ int main()
         4, 5, 6,
         6, 7, 4
     };
-    
-    unsigned int ibo;
-    GLCall(glGenBuffers(1, &ibo));
-    
-    unsigned int vao1, vao2;
-    GLCall(glGenVertexArrays(1, &vao1));
-    GLCall(glGenVertexArrays(1, &vao2));
 
-    unsigned int vbo;
-    GLCall(glGenBuffers(1, &vbo));
+    VertexArray vao1, vao2;
+    VertexBuffer vbo1(player_triangles, 4 * 2 * sizeof(float));
+    VertexBuffer vbo2(end_triangles, 4 * 2 * sizeof(float));
+    VertexBufferLayout layout;
+    IndexBuffer ibo(indices, 6);
     
-    GLCall(glBindVertexArray(vao1));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * 2 * sizeof(float), game_triangles, GL_STATIC_DRAW));
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
-//    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
-    GLCall(glEnableVertexAttribArray(0));
-//    GLCall(glEnableVertexAttribArray(1));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+    vao1.Bind();
+    vbo1.Bind();
+    layout.PushFloat(2);
+    vao1.AddBuffer(vbo1, layout);
+    ibo.Bind();
     
-    GLCall(glBindVertexArray(vao2));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * 2 * sizeof(float), game_triangles, GL_STATIC_DRAW));
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
-//    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
-    GLCall(glEnableVertexAttribArray(0));
-//    GLCall(glEnableVertexAttribArray(1));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 2 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+    vao2.Bind();
+    vbo2.Bind();
+    layout.PushFloat(2);
+    vao2.AddBuffer(vbo2, layout);
+    ibo.Bind();
+        
+//    unsigned int vao1, vao2;
+//    GLCall(glGenVertexArrays(1, &vao1));
+//    GLCall(glGenVertexArrays(1, &vao2));
+//
+//    GLCall(glBindVertexArray(vao1));
+   
+//    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
+//    GLCall(glEnableVertexAttribArray(0));
+    
+    
+//    GLCall(glBindVertexArray(vao2));
+    
+//    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
+//    GLCall(glEnableVertexAttribArray(0));
+    
     
     ShaderProgramSource source = ParseShader("OpenGL_tutorial/basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
@@ -339,10 +332,10 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         
-        glBindVertexArray(vao1);
+        vao1.Bind();
         GLCall(glUniform4f(location, 0.0f, 1.0f, 0.0f, 1.0f));
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-        glBindVertexArray(vao2);
+        vao2.Bind();
         GLCall(glUniform4f(location, 1.0f, 0.0f, 0.0f, 1.0f));
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
@@ -369,7 +362,7 @@ int main()
     }
 
     glDeleteProgram(shader);
-    
+    }
     glfwTerminate();
     return 0;
 }
