@@ -276,17 +276,13 @@ int main()
     };
     
     unsigned int indices[] = {
-        // player triangle
         0, 1, 2,
-        2, 3, 0,
-        // destination triangle
-        4, 5, 6,
-        6, 7, 4
+        2, 3, 0
     };
 
     VertexArray vao1, vao2;
-    VertexBuffer vbo1(player_triangles, 4 * 2 * sizeof(float));
-    VertexBuffer vbo2(end_triangles, 4 * 2 * sizeof(float));
+    VertexBuffer vbo1(player_triangles, 4 * 2 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo2(end_triangles, 4 * 2 * sizeof(float), GL_STATIC_DRAW);
     VertexBufferLayout layout;
     IndexBuffer ibo(indices, 6);
     
@@ -295,29 +291,13 @@ int main()
     layout.PushFloat(2);
     vao1.AddBuffer(vbo1, layout);
     ibo.Bind();
-    
+
     vao2.Bind();
     vbo2.Bind();
     layout.PushFloat(2);
     vao2.AddBuffer(vbo2, layout);
     ibo.Bind();
-        
-//    unsigned int vao1, vao2;
-//    GLCall(glGenVertexArrays(1, &vao1));
-//    GLCall(glGenVertexArrays(1, &vao2));
-//
-//    GLCall(glBindVertexArray(vao1));
-   
-//    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
-//    GLCall(glEnableVertexAttribArray(0));
-    
-    
-//    GLCall(glBindVertexArray(vao2));
-    
-//    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(4 * 2 * sizeof(float))));
-//    GLCall(glEnableVertexAttribArray(0));
-    
-    
+
     ShaderProgramSource source = ParseShader("OpenGL_tutorial/basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     GLCall(glUseProgram(shader));
