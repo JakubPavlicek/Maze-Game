@@ -240,11 +240,11 @@ int main()
     vao2.AddBuffer(vbo2, layout2);
     ibo.Bind();
 
-    Shader shader("OpenGL_tutorial/basic.shader");
+    Shader shader("OpenGL/basic.shader");
     shader.Bind();
         
-    Texture texture_player("OpenGL_tutorial/pepega.jpg");
-    Texture texture_end("OpenGL_tutorial/end.png");
+    Texture texture_player("OpenGL/pepega.jpg");
+    Texture texture_end("OpenGL/end.png");
     texture_player.Bind();
     shader.SetUniform1i("u_Texture", 0);
     
