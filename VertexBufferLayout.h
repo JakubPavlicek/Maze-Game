@@ -35,7 +35,6 @@ public:
     void PushFloat(unsigned int count)
     {
         m_Elements.push_back({ GL_FLOAT, count, GL_FALSE });
-        if(m_Elements.size() >= 2)
         m_Stride += count * VertexBufferElement::GetSizeOfType(GL_FLOAT);
     }
     
