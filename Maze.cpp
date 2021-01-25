@@ -8,7 +8,6 @@
 #include <cstdio>
 #include <utility>
 #include <map>
-#include <fstream>
 #include <sstream>
 
 #include <ft2build.h>
@@ -18,8 +17,11 @@
 #include "Renderer.h"
 
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
+#include "Shader.h"
+#include "Texture.h"
 
 #include "glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -62,7 +64,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Nahoru" << std::endl;
-                posY += 0.05f;
+                posY += 0.55f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Nahoru - opak" << std::endl;
@@ -76,7 +78,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Dolu" << std::endl;
-                posY -= 0.05f;
+                posY -= 0.55f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Dolu - opak" << std::endl;
@@ -90,7 +92,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Doleva" << std::endl;
-                posX -= 0.05f;
+                posX -= 0.55f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Doleva - opak" << std::endl;
@@ -104,7 +106,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Doprava" << std::endl;
-                posX += 0.05f;
+                posX += 0.55f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Doprava - opak" << std::endl;
@@ -115,81 +117,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-struct ShaderProgramSource
+void key_callback_end_state(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    std::string VertexSource;
-    std::string FragmentSource;
-};
-
-static ShaderProgramSource ParseShader(const std::string& filepath)
-{
-    std::ifstream stream(filepath);
-    
-    enum class ShaderType
-    {
-        NONE = -1, VERTEX = 0, FRAGMENT = 1
-    };
-    
-    std::string line;
-    std::stringstream ss[2];
-    ShaderType type = ShaderType::NONE;
-    while(getline(stream, line))
-    {
-        if(line.find("#shader") != std::string::npos)
-        {
-            if(line.find("vertex") != std::string::npos)
-                type = ShaderType::VERTEX;
-            else if(line.find("fragment") != std::string::npos)
-                type = ShaderType::FRAGMENT;
-        }
-        else
-        {
-            ss[(int)type] << line << '\n';
-        }
-    }
-    
-    return { ss[0].str(), ss[1].str() };
-}
-
-static unsigned int CompileShader(unsigned int type, const std::string& source)
-{
-    unsigned int id = glCreateShader(type);
-    const char* src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
-    
-    int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    if(result == GL_FALSE)
-    {
-        int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char message[length];
-        glGetShaderInfoLog(id, length, &length, message);
-        std::cout << "Failed to coompile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader: " << std::endl;
-        std::cout << message << std::endl;
-        glDeleteShader(id);
-        return 0;
-    }
-    
-    return id;
-}
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
-{
-    unsigned int program = glCreateProgram();
-    unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-    
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-    glValidateProgram(program);
-    
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-    
-    return program;
+    if(key == GLFW_KEY_ESCAPE || key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)
+        exit(0);
 }
 
 int main()
@@ -260,19 +191,25 @@ int main()
     //
     
     glfwSetKeyCallback(window, key_callback);
+    
     {
     float player_triangles[] = {
-        -1.0f, -0.9f,
-        -1.0f, -1.0f,
-        -0.9f, -1.0f,
-        -0.9f, -0.9f
+        -1.0f, -1.0f, 0.0f, 0.0f,
+        -0.9f, -1.0f, 1.0f, 0.0f,
+        -0.9f, -0.9f, 1.0f, 1.0f,
+        -1.0f, -0.9f, 0.0f, 1.0f
+        
+//        -0.5f, -0.5f, 0.0f, 0.0f,
+//         0.5f, -0.5f, 1.0f, 0.0f,
+//         0.5f,  0.5f, 1.0f, 1.0f,
+//        -0.5f,  0.5f, 0.0f, 1.0f
     };
         
     float end_triangles[] = {
-        1.0f,  0.9f,
-        1.0f,  1.0f,
-        0.9f,  1.0f,
-        0.9f,  0.9f
+        0.9f, 0.9f, 0.0f, 0.0f,
+        1.0f, 0.9f, 1.0f, 0.0f,
+        1.0f, 1.0f, 1.0f, 1.0f,
+        0.9f, 1.0f, 0.0f, 1.0f
     };
     
     unsigned int indices[] = {
@@ -280,58 +217,69 @@ int main()
         2, 3, 0
     };
 
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        
     VertexArray vao1, vao2;
-    VertexBuffer vbo1(player_triangles, 4 * 2 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo2(end_triangles, 4 * 2 * sizeof(float), GL_STATIC_DRAW);
-    VertexBufferLayout layout;
+    VertexBuffer vbo1(player_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo2(end_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBufferLayout layout1, layout2;
     IndexBuffer ibo(indices, 6);
     
     vao1.Bind();
     vbo1.Bind();
-    layout.PushFloat(2);
-    vao1.AddBuffer(vbo1, layout);
+    layout1.PushFloat(2);
+    layout1.PushFloat(2);
+    vao1.AddBuffer(vbo1, layout1);
     ibo.Bind();
 
     vao2.Bind();
     vbo2.Bind();
-    layout.PushFloat(2);
-    vao2.AddBuffer(vbo2, layout);
+    layout2.PushFloat(2);
+    layout2.PushFloat(2);
+    vao2.AddBuffer(vbo2, layout2);
     ibo.Bind();
 
-    ShaderProgramSource source = ParseShader("OpenGL_tutorial/basic.shader");
-    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    GLCall(glUseProgram(shader));
-     
-    int location = glGetUniformLocation(shader, "u_Color");
-    ASSERT(location != -1);
+    Shader shader("OpenGL_tutorial/basic.shader");
+    shader.Bind();
+        
+    Texture texture_player("OpenGL_tutorial/pepega.jpg");
+    Texture texture_end("OpenGL_tutorial/end.png");
+    texture_player.Bind();
+    shader.SetUniform1i("u_Texture", 0);
     
+    
+    vao1.Unbind();
+    vao2.Unbind();
+    vbo1.Unbind();
+    vbo2.Unbind();
+    ibo.Unbind();
+    shader.Unbind();
+        
+    Renderer renderer;
+        
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        renderer.Clear();
         
-        vao1.Bind();
-        GLCall(glUniform4f(location, 0.0f, 1.0f, 0.0f, 1.0f));
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-        vao2.Bind();
-        GLCall(glUniform4f(location, 1.0f, 0.0f, 0.0f, 1.0f));
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        shader.Bind();
+        
+        texture_player.Bind();
+        shader.SetUniform4f("u_Color", 0.0f, 1.0f, 0.0f, 1.0f);
+        renderer.Draw(vao1, ibo, shader);
+        
+        texture_end.Bind();
+        shader.SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
+        renderer.Draw(vao2, ibo, shader);
 
         // Win
         if(posX >= 1.8f && posY >= 1.8f)
         {
-            bool erase_loop = false;
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            erase_loop = true;
-            while(erase_loop)
-            {
-                posX = 2;
-                posY = 2;
-                erase_loop = false;
-            }
-            // tady napsat "YOU WIN"
+            renderer.ClearWholeScreen();
+            glfwSetKeyCallback(window, key_callback_end_state);
+            // "YOU WIN" text
         }
         
         /* Swap front and back buffers */
@@ -340,8 +288,6 @@ int main()
         /* Poll for and process events */
         glfwPollEvents();
     }
-
-    glDeleteProgram(shader);
     }
     glfwTerminate();
     return 0;
