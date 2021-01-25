@@ -64,7 +64,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Nahoru" << std::endl;
-                posY += 0.55f;
+                posY += 0.05f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Nahoru - opak" << std::endl;
@@ -78,7 +78,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Dolu" << std::endl;
-                posY -= 0.55f;
+                posY -= 0.05f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Dolu - opak" << std::endl;
@@ -92,7 +92,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Doleva" << std::endl;
-                posX -= 0.55f;
+                posX -= 0.05f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Doleva - opak" << std::endl;
@@ -106,7 +106,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Doprava" << std::endl;
-                posX += 0.55f;
+                posX += 0.05f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Doprava - opak" << std::endl;
@@ -193,17 +193,20 @@ int main()
     glfwSetKeyCallback(window, key_callback);
     
     {
+        
+    /*
     float player_triangles[] = {
-        -1.0f, -1.0f, 0.0f, 0.0f,
-        -0.9f, -1.0f, 1.0f, 0.0f,
-        -0.9f, -0.9f, 1.0f, 1.0f,
-        -1.0f, -0.9f, 0.0f, 1.0f
+        -1.0f + posX, -1.0f + posY, 0.0f, 0.0f,
+        -0.9f + posX, -1.0f + posY, 1.0f, 0.0f,
+        -0.9f + posX, -0.9f + posY, 1.0f, 1.0f,
+        -1.0f + posX, -0.9f + posY, 0.0f, 1.0f
         
 //        -0.5f, -0.5f, 0.0f, 0.0f,
 //         0.5f, -0.5f, 1.0f, 0.0f,
 //         0.5f,  0.5f, 1.0f, 1.0f,
 //        -0.5f,  0.5f, 0.0f, 1.0f
     };
+    */
         
     float end_triangles[] = {
         0.9f, 0.9f, 0.0f, 0.0f,
@@ -221,11 +224,11 @@ int main()
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         
     VertexArray vao1, vao2;
-    VertexBuffer vbo1(player_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo1(nullptr, 4 * 4 * sizeof(float), GL_DYNAMIC_DRAW);
     VertexBuffer vbo2(end_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
     VertexBufferLayout layout1, layout2;
     IndexBuffer ibo(indices, 6);
-    
+        
     vao1.Bind();
     vbo1.Bind();
     layout1.PushFloat(2);
@@ -248,7 +251,6 @@ int main()
     texture_player.Bind();
     shader.SetUniform1i("u_Texture", 0);
     
-    
     vao1.Unbind();
     vao2.Unbind();
     vbo1.Unbind();
@@ -264,7 +266,17 @@ int main()
         /* Render here */
         renderer.Clear();
         
+        float player_triangles[] = {
+            -1.0f + posX, -1.0f + posY, 0.0f, 0.0f,
+            -0.9f + posX, -1.0f + posY, 1.0f, 0.0f,
+            -0.9f + posX, -0.9f + posY, 1.0f, 1.0f,
+            -1.0f + posX, -0.9f + posY, 0.0f, 1.0f
+        };
+        
         shader.Bind();
+        
+        vbo1.Bind();
+        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * 4 * sizeof(float), player_triangles));
         
         texture_player.Bind();
         shader.SetUniform4f("u_Color", 0.0f, 1.0f, 0.0f, 1.0f);
