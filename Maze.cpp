@@ -219,31 +219,6 @@ int main()
         -0.6f, -0.3f, 1.0f, 0.0f,
         -0.6f,  0.3f, 1.0f, 1.0f,
         -0.9f,  0.3f, 0.0f, 1.0f,
-        
-        -0.9f,  -0.3f, 0.0f, 0.0f,
-        -0.35f, -0.3f, 1.0f, 0.0f,
-        -0.35f,  0.3f, 1.0f, 1.0f,
-        -0.9f,   0.3f, 0.0f, 1.0f,
-        
-        -0.9f, -0.3f, 0.0f, 0.0f,
-        -0.1f, -0.3f, 1.0f, 0.0f,
-        -0.1f,  0.3f, 1.0f, 1.0f,
-        -0.9f,  0.3f, 0.0f, 1.0f,
-        
-        -0.9f, -0.3f, 0.0f, 0.0f,
-         0.3f, -0.3f, 1.0f, 0.0f,
-         0.3f,  0.3f, 1.0f, 1.0f,
-        -0.9f,  0.3f, 0.0f, 1.0f,
-        
-        -0.9f,  -0.3f, 0.0f, 0.0f,
-         0.55f, -0.3f, 1.0f, 0.0f,
-         0.55f,  0.3f, 1.0f, 1.0f,
-        -0.9f,   0.3f, 0.0f, 1.0f,
-        
-        -0.9f, -0.3f, 0.0f, 0.0f,
-         0.8f, -0.3f, 1.0f, 0.0f,
-         0.8f,  0.3f, 1.0f, 1.0f,
-        -0.9f,  0.3f, 0.0f, 1.0f
     };
     
     unsigned int indices[] = {
@@ -259,7 +234,7 @@ int main()
     VertexBuffer vbo2(end_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
     VertexBuffer vbo3(text_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
     VertexBufferLayout layout1, layout2, layout3;
-    IndexBuffer ibo(indices, 6);
+    IndexBuffer ibo(indices, 36);
         
     vao1.Bind();
     vbo1.Bind();
@@ -288,8 +263,6 @@ int main()
     Shader shader("OpenGL_tutorial/basic.shader");
     shader.Bind();
         
-    Shader shader2("OpenGL_tutorial/text.shader");
-        
     Texture texture_player("OpenGL_tutorial/pepega.png");
     Texture texture_end("OpenGL_tutorial/end.png");
     Texture Y("OpenGL_tutorial/abeceda/y.png");
@@ -304,11 +277,12 @@ int main()
     
     vao1.Unbind();
     vao2.Unbind();
+    vao3.Unbind();
     vbo1.Unbind();
     vbo2.Unbind();
+    vbo3.Unbind();
     ibo.Unbind();
     shader.Unbind();
-    shader2.Unbind();
         
     Renderer renderer;
         
@@ -319,7 +293,7 @@ int main()
     ImGui_ImplOpenGL3_Init((char *)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
         
     glm::vec3 translation(0.0f, 0, 0);
-        
+    
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -358,38 +332,40 @@ int main()
         {
             renderer.ClearWholeScreen();
             glfwSetKeyCallback(window, key_callback_end_state);
-            // "YOU WIN" text
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.1, 0, 0));
+            
+        // "YOU WIN" text
+            
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0, 0));
             glm::mat4 mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             Y.Bind();
             renderer.Draw(vao3, ibo, shader);
             
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.35, 0, 0));
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.25, 0, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             O.Bind();
             renderer.Draw(vao3, ibo, shader);
-            
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.6, 0, 0));
+
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.5, 0, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             U.Bind();
             renderer.Draw(vao3, ibo, shader);
-            
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(1, 0, 0));
+
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(1, 0.1, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             W.Bind();
             renderer.Draw(vao3, ibo, shader);
-            
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(1.25, 0, 0));
+
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(1.25, 0.1, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             I.Bind();
             renderer.Draw(vao3, ibo, shader);
-            
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(1.5, 0, 0));
+
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(1.5, 0.1, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             N.Bind();
