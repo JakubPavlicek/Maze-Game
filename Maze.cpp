@@ -24,23 +24,22 @@
 #include "Texture.h"
 
 #include "glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "gtc/matrix_transform.hpp"
 
-static float posX = 0, posY = 0;
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+static float posX = -1.0f, posY = -1.0f;
 
 static int WIDTH = 640, HEIGHT = 480;
 
 std::pair<int, int> DisableWindowAwayPos()
 {
-    if(posX < 0)
-        posX = 0;
-    if(posX > 1.9)
-        posX = 1.9;
-    if(posY < 0)
-        posY = 0;
-    if(posY > 1.9)
-        posY = 1.9;
+    if(posX < -1.0) { posX = -1.0; }
+    if(posX > 0.9)  { posX = 0.9;  }
+    if(posY < -1.0) { posY = -1.0; }
+    if(posY > 0.9)  { posY = 0.9;  }
 
     return { posX, posY };
 }
@@ -214,6 +213,38 @@ int main()
         1.0f, 1.0f, 1.0f, 1.0f,
         0.9f, 1.0f, 0.0f, 1.0f
     };
+        
+    float text_triangles[] = {
+        -0.9f, -0.3f, 0.0f, 0.0f,
+        -0.6f, -0.3f, 1.0f, 0.0f,
+        -0.6f,  0.3f, 1.0f, 1.0f,
+        -0.9f,  0.3f, 0.0f, 1.0f,
+        
+        -0.9f,  -0.3f, 0.0f, 0.0f,
+        -0.35f, -0.3f, 1.0f, 0.0f,
+        -0.35f,  0.3f, 1.0f, 1.0f,
+        -0.9f,   0.3f, 0.0f, 1.0f,
+        
+        -0.9f, -0.3f, 0.0f, 0.0f,
+        -0.1f, -0.3f, 1.0f, 0.0f,
+        -0.1f,  0.3f, 1.0f, 1.0f,
+        -0.9f,  0.3f, 0.0f, 1.0f,
+        
+        -0.9f, -0.3f, 0.0f, 0.0f,
+         0.3f, -0.3f, 1.0f, 0.0f,
+         0.3f,  0.3f, 1.0f, 1.0f,
+        -0.9f,  0.3f, 0.0f, 1.0f,
+        
+        -0.9f,  -0.3f, 0.0f, 0.0f,
+         0.55f, -0.3f, 1.0f, 0.0f,
+         0.55f,  0.3f, 1.0f, 1.0f,
+        -0.9f,   0.3f, 0.0f, 1.0f,
+        
+        -0.9f, -0.3f, 0.0f, 0.0f,
+         0.8f, -0.3f, 1.0f, 0.0f,
+         0.8f,  0.3f, 1.0f, 1.0f,
+        -0.9f,  0.3f, 0.0f, 1.0f
+    };
     
     unsigned int indices[] = {
         0, 1, 2,
@@ -223,10 +254,11 @@ int main()
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         
-    VertexArray vao1, vao2;
+    VertexArray vao1, vao2, vao3;
     VertexBuffer vbo1(nullptr, 4 * 4 * sizeof(float), GL_DYNAMIC_DRAW);
     VertexBuffer vbo2(end_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBufferLayout layout1, layout2;
+    VertexBuffer vbo3(text_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBufferLayout layout1, layout2, layout3;
     IndexBuffer ibo(indices, 6);
         
     vao1.Bind();
@@ -243,11 +275,30 @@ int main()
     vao2.AddBuffer(vbo2, layout2);
     ibo.Bind();
 
-    Shader shader("OpenGL/basic.shader");
+    vao3.Bind();
+    vbo3.Bind();
+    layout3.PushFloat(2);
+    layout3.PushFloat(2);
+    vao3.AddBuffer(vbo3, layout3);
+    ibo.Bind();
+        
+    glm::mat4 proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);   // aspect ratio, prespective
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0)); // camera position, orientation
+        
+    Shader shader("OpenGL_tutorial/basic.shader");
     shader.Bind();
         
-    Texture texture_player("OpenGL/pepega.jpg");
-    Texture texture_end("OpenGL/end.png");
+    Shader shader2("OpenGL_tutorial/text.shader");
+        
+    Texture texture_player("OpenGL_tutorial/pepega.png");
+    Texture texture_end("OpenGL_tutorial/end.png");
+    Texture Y("OpenGL_tutorial/abeceda/y.png");
+    Texture O("OpenGL_tutorial/abeceda/o.png");
+    Texture U("OpenGL_tutorial/abeceda/u.png");
+    Texture W("OpenGL_tutorial/abeceda/w.png");
+    Texture I("OpenGL_tutorial/abeceda/i.png");
+    Texture N("OpenGL_tutorial/abeceda/n.png");
+
     texture_player.Bind();
     shader.SetUniform1i("u_Texture", 0);
     
@@ -257,8 +308,17 @@ int main()
     vbo2.Unbind();
     ibo.Unbind();
     shader.Unbind();
+    shader2.Unbind();
         
     Renderer renderer;
+        
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init((char *)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
+        
+    glm::vec3 translation(0.0f, 0, 0);
         
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -266,11 +326,18 @@ int main()
         /* Render here */
         renderer.Clear();
         
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
+        glm::mat4 mvp = proj * view * model;
+        
         float player_triangles[] = {
-            -1.0f + posX, -1.0f + posY, 0.0f, 0.0f,
-            -0.9f + posX, -1.0f + posY, 1.0f, 0.0f,
-            -0.9f + posX, -0.9f + posY, 1.0f, 1.0f,
-            -1.0f + posX, -0.9f + posY, 0.0f, 1.0f
+            -1.0f + (posX + 1), -1.0f + (posY + 1), 0.0f, 0.0f,
+            -0.9f + (posX + 1), -1.0f + (posY + 1), 1.0f, 0.0f,
+            -0.9f + (posX + 1), -0.9f + (posY + 1), 1.0f, 1.0f,
+            -1.0f + (posX + 1), -0.9f + (posY + 1), 0.0f, 1.0f
         };
         
         shader.Bind();
@@ -278,21 +345,69 @@ int main()
         vbo1.Bind();
         GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * 4 * sizeof(float), player_triangles));
         
+        shader.SetUniformMat4f("u_MVP", mvp);
+        
         texture_player.Bind();
-        shader.SetUniform4f("u_Color", 0.0f, 1.0f, 0.0f, 1.0f);
         renderer.Draw(vao1, ibo, shader);
         
         texture_end.Bind();
-        shader.SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.0f);
         renderer.Draw(vao2, ibo, shader);
 
         // Win
-        if(posX >= 1.8f && posY >= 1.8f)
+        if(posX >= 0.81f && posY >= 0.81f)
         {
             renderer.ClearWholeScreen();
             glfwSetKeyCallback(window, key_callback_end_state);
             // "YOU WIN" text
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.1, 0, 0));
+            glm::mat4 mvp_text = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp_text);
+            Y.Bind();
+            renderer.Draw(vao3, ibo, shader);
+            
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.35, 0, 0));
+            mvp_text = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp_text);
+            O.Bind();
+            renderer.Draw(vao3, ibo, shader);
+            
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.6, 0, 0));
+            mvp_text = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp_text);
+            U.Bind();
+            renderer.Draw(vao3, ibo, shader);
+            
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(1, 0, 0));
+            mvp_text = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp_text);
+            W.Bind();
+            renderer.Draw(vao3, ibo, shader);
+            
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(1.25, 0, 0));
+            mvp_text = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp_text);
+            I.Bind();
+            renderer.Draw(vao3, ibo, shader);
+            
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(1.5, 0, 0));
+            mvp_text = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp_text);
+            N.Bind();
+            renderer.Draw(vao3, ibo, shader);
         }
+        else
+        {
+            glfwSetKeyCallback(window, key_callback);
+        }
+        
+        {
+            ImGui::SliderFloat3("Translation", &translation.x, -1.0f, 1.0f);
+            ImGui::SliderFloat2("PosX", &posX, -1.0f, 0.9f);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        }
+        
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -301,6 +416,10 @@ int main()
         glfwPollEvents();
     }
     }
+    
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui::DestroyContext();
+    
     glfwTerminate();
     return 0;
 }
