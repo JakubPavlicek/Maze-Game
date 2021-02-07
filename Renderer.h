@@ -1,6 +1,8 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <map>
+#include <iostream>
 
 #include "VertexArray.h"
 #include "IndexBuffer.h"
@@ -14,10 +16,23 @@
 void GLClearError();
 bool GLLogCall(const char* function, const char* file, int line);
 
+struct Character {
+    unsigned int TextureID; // ID handle of the glyph texture
+    glm::ivec2   Size;      // Size of glyph
+    glm::ivec2   Bearing;   // Offset from baseline to left/top of glyph
+    unsigned int Advance;   // Horizontal offset to advance to next glyph
+};
+
+static std::map<GLchar, Character> Characters;
+static unsigned int VAO, VBO;
+
 class Renderer
 {
 public:
     void Clear() const;
     void ClearWholeScreen() const;
     void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
+    void DrawWalls(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
+    void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color);
+    int InitializeFreetype();
 };
