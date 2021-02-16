@@ -139,12 +139,8 @@ int Renderer::InitializeFreetype()
     return 0;
 }
 
-void Renderer::RenderText(Shader &shader, std::string text, float x, float y, float scale, glm::vec3 color)
+void Renderer::RenderText(std::string text, float x, float y, float scale)
 {
-    // activate corresponding render state
-    shader.Bind();
-    GLCall(glUniform3f(glGetUniformLocation(shader.GetShader(), "textColor"), color.x, color.y, color.z));
-    GLCall(glActiveTexture(GL_TEXTURE0));
     GLCall(glBindVertexArray(VAO));
     
     // iterate through all characters
@@ -183,4 +179,3 @@ void Renderer::RenderText(Shader &shader, std::string text, float x, float y, fl
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
-

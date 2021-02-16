@@ -1,6 +1,10 @@
 #pragma once
 
 #include <GL/glew.h>
+
+#include "glm.hpp"
+#include "gtc/matrix_transform.hpp"
+#include "gtc/type_ptr.hpp"
 #include <map>
 #include <iostream>
 
@@ -33,6 +37,6 @@ public:
     void ClearWholeScreen() const;
     void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
     void DrawWalls(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
-    void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color);
+    void RenderText(std::string text, float x, float y, float scale);
     int InitializeFreetype();
 };
