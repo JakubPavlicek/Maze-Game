@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stack>
 #include <ctime>
+#include <vector>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -127,6 +128,115 @@ void key_callback_end_state(GLFWwindow* window, int key, int scancode, int actio
 {
     if(key == GLFW_KEY_ESCAPE || key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)
         exit(0);
+}
+
+struct Walls
+{
+    Walls(int width, int height)
+        : m_Width(width), m_Height(height)
+    {}
+    
+    int m_Width, m_Height;
+    
+    int left[7][9][6]; // row, num of left walls, nums of #
+    int top[8][7][2]; // row, num of top walls, nums of #
+    
+    void FillLeft(int row, int walls, int minWidth);
+    void FillTop(int count, int line, int minHeight);
+    
+    void DrawLeft();
+    void DrawTop();
+    
+    void RemoveLeft(int line, int count);
+    void RemoveTop(int count, int line);
+    
+    Renderer renderer;
+};
+
+void Walls::FillLeft(int row, int walls, int minWidth)
+{
+    for(int i = 0; i < row; i++)
+    {
+        int x = minWidth;
+        for(int j = 0; j < walls; j++)
+        {
+            if(x <= m_Width)
+            {
+                for(int k = 0; k <= 5; k++)
+                {
+                    if(x % 70 == 0)
+                        break;
+
+                    left[i][j][k] = x;
+//                    std::cout << left[i][j][k] << " at row " << i << " at " << j << std::endl;
+                    x += 10;
+                    
+                }
+                x += 10;
+            }
+        }
+    }
+}
+
+void Walls::DrawLeft()
+{
+    for(int i = 0; i <= 6; i++)
+    {
+        for(int j = 0; j <= 8; j++)
+        {
+            for(int k = 0; k <= 5; k++)
+            {
+//                std::cout << left[i][j][k] << " at row " << i << " at " << j << std::endl;
+                renderer.RenderChar('#', left[i][j][k],  32 + (i * 60), 0.4f);
+            }
+        }
+    }
+}
+
+// line = 7, count = 8
+void Walls::FillTop(int count, int line, int minHeight)
+{
+    for(int i = 0; i < count; i++)
+    {
+        int x = minHeight;
+        for(int j = 0; j < line; j++)
+        {
+            if(x <= m_Height)
+            {
+                for(int k = 0; k < 2; k++)
+                {
+                    top[i][j][k] = x + k * 16;
+//                    std::cout << top[i][j][k] << " at line " << i << " at " << j << std::endl;
+                }
+                x += 60;
+            }
+        }
+    }
+}
+
+void Walls::DrawTop()
+{
+    for(int i = 0; i < 8; i++)
+    {
+        for(int j = 0; j < 7; j++)
+        {
+            for(int k = 0; k < 2; k++)
+            {
+                //                std::cout << left[i][j][k] << " at row " << i << " at " << j << std::endl;
+                renderer.RenderChar('#', 70 + (i * 70), top[i][j][k], 0.4f);
+            }
+        }
+    }
+}
+
+void Walls::RemoveLeft(int line, int count)
+{
+    
+}
+
+void Walls::RemoveTop(int count, int line)
+{
+    
 }
 
 int main()
@@ -289,13 +399,11 @@ int main()
 //        ibo_walls.Bind();
 
 // END OF MAZE
-        float walls_x[] = {
-            0.0f, 70.0f, 140.0f, 210.0f, 280.0f, 350.0f, 420.0f, 490.0f, 560.0f, 630.0f
-        };
+       
+        Walls walls(630, 464);
+        Walls walls2(630, 464);
         
-        float walls_y[] = {
-            
-        };
+        
         
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -318,136 +426,46 @@ int main()
         };
         
         shader_maze.Bind();
-        shader_maze.SetUniform3f("textColor", 0.8f, 0.2f, 0.2f);
         
-        renderer.RenderText("#", walls_x[1], 32.0f, 0.4f);
-        renderer.RenderText("#", walls_x[2], 32.0f, 0.4f);
-        renderer.RenderText("#", walls_x[3], 32.0f, 0.4f);
-        renderer.RenderText("#", walls_x[4], 32.0f, 0.4f);
-        renderer.RenderText("#", walls_x[5], 32.0f, 0.4f);
-        renderer.RenderText("#", walls_x[6], 32.0f, 0.4f);
-        renderer.RenderText("#", walls_x[7], 32.0f, 0.4f);
-        renderer.RenderText("#", walls_x[8], 32.0f, 0.4f);
+        // mrizka
+        shader_maze.SetUniform3f("textColor", 0.2f, 0.4f, 0.8f);
         
-        renderer.RenderText("#", walls_x[1], 92.0f, 0.4f);
-        renderer.RenderText("#", walls_x[2], 92.0f, 0.4f);
-        renderer.RenderText("#", walls_x[3], 92.0f, 0.4f);
-        renderer.RenderText("#", walls_x[4], 92.0f, 0.4f);
-        renderer.RenderText("#", walls_x[5], 92.0f, 0.4f);
-        renderer.RenderText("#", walls_x[6], 92.0f, 0.4f);
-        renderer.RenderText("#", walls_x[7], 92.0f, 0.4f);
-        renderer.RenderText("#", walls_x[8], 92.0f, 0.4f);
+        for(int i = 70; i <= 560; i += 70)
+        {
+            for(int j = 32; j <= 392; j += 60)
+            {
+                renderer.RenderChar('#', i, j, 0.4f);
+            }
+        }
         
-        renderer.RenderText("#", walls_x[1], 152.0f, 0.4);
-        renderer.RenderText("#", walls_x[2], 152.0f, 0.4);
-        renderer.RenderText("#", walls_x[3], 152.0f, 0.4);
-        renderer.RenderText("#", walls_x[4], 152.0f, 0.4);
-        renderer.RenderText("#", walls_x[5], 152.0f, 0.4);
-        renderer.RenderText("#", walls_x[6], 152.0f, 0.4);
-        renderer.RenderText("#", walls_x[7], 152.0f, 0.4);
-        renderer.RenderText("#", walls_x[8], 152.0f, 0.4);
+        shader_maze.SetUniform3f("textColor", 0.2f, 0.8f, 0.2f);
         
-        renderer.RenderText("#", walls_x[1], 212.0f, 0.4f);
-        renderer.RenderText("#", walls_x[2], 212.0f, 0.4f);
-        renderer.RenderText("#", walls_x[3], 212.0f, 0.4f);
-        renderer.RenderText("#", walls_x[4], 212.0f, 0.4f);
-        renderer.RenderText("#", walls_x[5], 212.0f, 0.4f);
-        renderer.RenderText("#", walls_x[6], 212.0f, 0.4f);
-        renderer.RenderText("#", walls_x[7], 212.0f, 0.4f);
-        renderer.RenderText("#", walls_x[8], 212.0f, 0.4f);
+        // left border wall
+        for(int i = 32; i <= 448; i += 16)
+            renderer.RenderChar('#', 0, i, 0.4f);
         
-        renderer.RenderText("#", walls_x[1], 272.0f, 0.4f);
-        renderer.RenderText("#", walls_x[2], 272.0f, 0.4f);
-        renderer.RenderText("#", walls_x[3], 272.0f, 0.4f);
-        renderer.RenderText("#", walls_x[4], 272.0f, 0.4f);
-        renderer.RenderText("#", walls_x[5], 272.0f, 0.4f);
-        renderer.RenderText("#", walls_x[6], 272.0f, 0.4f);
-        renderer.RenderText("#", walls_x[7], 272.0f, 0.4f);
-        renderer.RenderText("#", walls_x[8], 272.0f, 0.4f);
-        
-        renderer.RenderText("#", walls_x[1], 332.0f, 0.4f);
-        renderer.RenderText("#", walls_x[2], 332.0f, 0.4f);
-        renderer.RenderText("#", walls_x[3], 332.0f, 0.4f);
-        renderer.RenderText("#", walls_x[4], 332.0f, 0.4f);
-        renderer.RenderText("#", walls_x[5], 332.0f, 0.4f);
-        renderer.RenderText("#", walls_x[6], 332.0f, 0.4f);
-        renderer.RenderText("#", walls_x[7], 332.0f, 0.4f);
-        renderer.RenderText("#", walls_x[8], 332.0f, 0.4f);
-        
-        renderer.RenderText("#", walls_x[1], 392.0f, 0.4f);
-        renderer.RenderText("#", walls_x[2], 392.0f, 0.4f);
-        renderer.RenderText("#", walls_x[3], 392.0f, 0.4f);
-        renderer.RenderText("#", walls_x[4], 392.0f, 0.4f);
-        renderer.RenderText("#", walls_x[5], 392.0f, 0.4f);
-        renderer.RenderText("#", walls_x[6], 392.0f, 0.4f);
-        renderer.RenderText("#", walls_x[7], 392.0f, 0.4f);
-        renderer.RenderText("#", walls_x[8], 392.0f, 0.4f);
+        // right border wall
+        for(int i = 32; i <= 416; i += 16)
+            renderer.RenderChar('#', 630, i, 0.4f);
         
         // top border wall
         renderer.RenderText("#####################################################", 0, 464.0f, 0.4f);
-        // left border wall
-        renderer.RenderText("#", walls_x[0], 32.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 48.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 64.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 80.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 96.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 112.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 128.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 144.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 160.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 176.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 192.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 208.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 224.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 240.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 256.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 272.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 288.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 304.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 320.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 336.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 352.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 368.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 384.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 400.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 416.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 432.0f, 0.4f);
-        renderer.RenderText("#", walls_x[0], 448.0f, 0.4f);
-        // right border wall
-        renderer.RenderText("#", walls_x[9], 32.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 48.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 64.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 80.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 96.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 112.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 128.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 144.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 160.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 176.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 192.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 208.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 224.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 240.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 256.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 272.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 288.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 304.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 320.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 336.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 352.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 368.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 384.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 400.0f, 0.4f);
-        renderer.RenderText("#", walls_x[9], 416.0f, 0.4f);
         
-//        renderer.RenderText(shader_maze, "#", 0.0f, 466.0f, 0.4f, glm::vec3(0.8f, 0.2f, 0.2f)); // xpos, ypos, scale, glm::vec3 color
-//        renderer.RenderText(shader_maze, "#", 630.0f, 2.0f, 0.4f, glm::vec3(0.8f, 0.2f, 0.2f)); // xpos, ypos, scale, glm::vec3 color
+        shader_maze.SetUniform3f("textColor", 0.8f, 0.2f, 0.2f);
+        
+        walls.FillLeft(7, 9, 10);
+        walls.DrawLeft();
+        
+        shader_maze.SetUniform3f("textColor", 1.0f, 0.9f, 0.9f);
+        
+        walls2.FillTop(8, 7, 54);
+        walls2.DrawTop();
         
         // usable xpos pixel range -> 0.0f - 630.0f // 630 / 33 = 19
         // usable ypos pixel range -> 2.0f - 466.0f // 464 / 25 = 18
         
-        // # width = 10
-        // # height = 16
+        // # width (x) = 10
+        // # height (y) = 16
         
         // 6x # between
         
@@ -477,13 +495,13 @@ int main()
             glfwSetKeyCallback(window, key_callback_end_state);
             
         // "YOU WIN" text
-            
+
             model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0, 0));
             glm::mat4 mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             Y.Bind();
             renderer.Draw(vao3, ibo, shader);
-            
+
             model = glm::translate(glm::mat4(1.0f), glm::vec3(0.25, 0, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
