@@ -37,6 +37,8 @@ public:
     void ClearWholeScreen() const;
     void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
     void DrawWalls(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
+    void DrawCell(float x, float y, const VertexArray& va, const IndexBuffer& ib, Shader& shader) const;
     void RenderText(std::string text, float x, float y, float scale);
+    void RenderChar(char letter, float x, float y, float scale);
     int InitializeFreetype();
 };

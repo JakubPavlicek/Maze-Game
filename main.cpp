@@ -5,13 +5,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <cstdio>
 #include <utility>
-#include <map>
-#include <sstream>
-#include <stack>
-#include <ctime>
 #include <vector>
+#include <stack>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -36,18 +34,16 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-static float posX = -1.0f, posY = -1.0f;
+static float posX = 0.0f, posY = 0.0f;
 
 static int WIDTH = 640, HEIGHT = 480;
 
-void RenderText(Shader &shader, std::string text, float x, float y, float scale, glm::vec3 color);
-
 std::pair<int, int> DisableWindowAwayPos()
 {
-    if(posX < -1.0) { posX = -1.0; }
-    if(posX > 0.9)  { posX = 0.9;  }
-    if(posY < -1.0) { posY = -1.0; }
-    if(posY > 0.9)  { posY = 0.9;  }
+    if(posX < 0.0f)    { posX = 0.0f;   }
+    if(posX > 620.0f)  { posX = 620.0f; }
+    if(posY < 0.0f)    { posY = 0.0f;   }
+    if(posY > 460.0f)  { posY = 460.0f; }
 
     return { posX, posY };
 }
@@ -71,11 +67,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Nahoru" << std::endl;
-                posY += 0.05f;
+                posY += 23.0f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Nahoru - opak" << std::endl;
-                posY += 0.05f;
+                posY += 23.0f;
                 break;
         }
         break;
@@ -85,11 +81,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Dolu" << std::endl;
-                posY -= 0.05f;
+                posY -= 23.0f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Dolu - opak" << std::endl;
-                posY -= 0.05f;
+                posY -= 23.0f;
                 break;
         }
         break;
@@ -99,11 +95,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Doleva" << std::endl;
-                posX -= 0.05f;
+                posX -= 23.0f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Doleva - opak" << std::endl;
-                posX -=  0.05f;
+                posX -= 23.0f;
                 break;
         }
         break;
@@ -113,11 +109,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             case GLFW_PRESS:
                 std::cout << "Doprava" << std::endl;
-                posX += 0.05f;
+                posX += 23.0f;
                 break;
             case GLFW_REPEAT:
                 std::cout << "Doprava - opak" << std::endl;
-                posX += 0.05f;
+                posX += 23.0f;
                 break;
         }
     break;
@@ -128,115 +124,6 @@ void key_callback_end_state(GLFWwindow* window, int key, int scancode, int actio
 {
     if(key == GLFW_KEY_ESCAPE || key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)
         exit(0);
-}
-
-struct Walls
-{
-    Walls(int width, int height)
-        : m_Width(width), m_Height(height)
-    {}
-    
-    int m_Width, m_Height;
-    
-    int left[7][9][6]; // row, num of left walls, nums of #
-    int top[8][7][2]; // row, num of top walls, nums of #
-    
-    void FillLeft(int row, int walls, int minWidth);
-    void FillTop(int count, int line, int minHeight);
-    
-    void DrawLeft();
-    void DrawTop();
-    
-    void RemoveLeft(int line, int count);
-    void RemoveTop(int count, int line);
-    
-    Renderer renderer;
-};
-
-void Walls::FillLeft(int row, int walls, int minWidth)
-{
-    for(int i = 0; i < row; i++)
-    {
-        int x = minWidth;
-        for(int j = 0; j < walls; j++)
-        {
-            if(x <= m_Width)
-            {
-                for(int k = 0; k <= 5; k++)
-                {
-                    if(x % 70 == 0)
-                        break;
-
-                    left[i][j][k] = x;
-//                    std::cout << left[i][j][k] << " at row " << i << " at " << j << std::endl;
-                    x += 10;
-                    
-                }
-                x += 10;
-            }
-        }
-    }
-}
-
-void Walls::DrawLeft()
-{
-    for(int i = 0; i <= 6; i++)
-    {
-        for(int j = 0; j <= 8; j++)
-        {
-            for(int k = 0; k <= 5; k++)
-            {
-//                std::cout << left[i][j][k] << " at row " << i << " at " << j << std::endl;
-                renderer.RenderChar('#', left[i][j][k],  32 + (i * 60), 0.4f);
-            }
-        }
-    }
-}
-
-// line = 7, count = 8
-void Walls::FillTop(int count, int line, int minHeight)
-{
-    for(int i = 0; i < count; i++)
-    {
-        int x = minHeight;
-        for(int j = 0; j < line; j++)
-        {
-            if(x <= m_Height)
-            {
-                for(int k = 0; k < 2; k++)
-                {
-                    top[i][j][k] = x + k * 16;
-//                    std::cout << top[i][j][k] << " at line " << i << " at " << j << std::endl;
-                }
-                x += 60;
-            }
-        }
-    }
-}
-
-void Walls::DrawTop()
-{
-    for(int i = 0; i < 8; i++)
-    {
-        for(int j = 0; j < 7; j++)
-        {
-            for(int k = 0; k < 2; k++)
-            {
-                //                std::cout << left[i][j][k] << " at row " << i << " at " << j << std::endl;
-                renderer.RenderChar('#', 70 + (i * 70), top[i][j][k], 0.4f);
-            }
-        }
-    }
-}
-
-void Walls::RemoveLeft(int line, int count)
-{
-    
-}
-
-void Walls::RemoveTop(int count, int line)
-{
-    
 }
 
 int main()
@@ -281,17 +168,38 @@ int main()
     {
         
     float end_triangles[] = {
-        0.9f, 0.9f, 0.0f, 0.0f,
-        1.0f, 0.9f, 1.0f, 0.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        0.9f, 1.0f, 0.0f, 1.0f
+        620.0f, 460.0f, 0.0f, 0.0f,
+        640.0f, 460.0f, 1.0f, 0.0f,
+        640.0f, 480.0f, 1.0f, 1.0f,
+        620.0f, 480.0f, 0.0f, 1.0f
+    };
+        
+    float path_triangles[] = {
+        0.0f,  0.0f,  0.0f, 0.0f,
+        20.0f, 0.0f,  1.0f, 0.0f,
+        20.0f, 20.0f, 1.0f, 1.0f,
+        0.0f,  20.0f, 0.0f, 1.0f
+    };
+        
+    float cell_triangles[] = {
+        0.0f,  0.0f,  0.0f, 0.0f,
+        20.0f, 0.0f,  1.0f, 0.0f,
+        20.0f, 3.0f, 1.0f, 1.0f,
+        0.0f,  3.0f, 0.0f, 1.0f
+    };
+    
+    float cell_triangles2[] = {
+        0.0f, 0.0f,  0.0f, 0.0f,
+        3.0f, 0.0f,  1.0f, 0.0f,
+        3.0f, 20.0f, 1.0f, 1.0f,
+        0.0f, 20.0f, 0.0f, 1.0f
     };
         
     float text_triangles[] = {
-        -0.9f, -0.3f, 0.0f, 0.0f,
-        -0.6f, -0.3f, 1.0f, 0.0f,
-        -0.6f,  0.3f, 1.0f, 1.0f,
-        -0.9f,  0.3f, 0.0f, 1.0f,
+        20.0f,  160.0f, 0.0f, 0.0f,
+        100.0f, 160.0f, 1.0f, 0.0f,
+        100.0f, 320.0f, 1.0f, 1.0f,
+        20.0f,  320.0f, 0.0f, 1.0f,
     };
     
     unsigned int indices[] = {
@@ -302,12 +210,15 @@ int main()
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         
-    VertexArray vao1, vao2, vao3;
+    VertexArray vao1, vao2, vao3, vao4, vao5, vao6;
     VertexBuffer vbo1(nullptr, 4 * 4 * sizeof(float), GL_DYNAMIC_DRAW);
     VertexBuffer vbo2(end_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo3(text_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBufferLayout layout1, layout2, layout3;
-    IndexBuffer ibo(indices, 36);
+    VertexBuffer vbo3(path_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo4(text_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo5(cell_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo6(cell_triangles2, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBufferLayout layout1, layout2, layout3, layout4, layout5, layout6;
+    IndexBuffer ibo(indices, 6);
         
     vao1.Bind();
     vbo1.Bind();
@@ -330,7 +241,28 @@ int main()
     vao3.AddBuffer(vbo3, layout3);
     ibo.Bind();
         
-    glm::mat4 proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);   // aspect ratio, prespective
+    vao4.Bind();
+    vbo4.Bind();
+    layout4.PushFloat(2);
+    layout4.PushFloat(2);
+    vao4.AddBuffer(vbo4, layout4);
+    ibo.Bind();
+    
+    vao5.Bind();
+    vbo5.Bind();
+    layout5.PushFloat(2);
+    layout5.PushFloat(2);
+    vao5.AddBuffer(vbo5, layout5);
+    ibo.Bind();
+    
+    vao6.Bind();
+    vbo6.Bind();
+    layout6.PushFloat(2);
+    layout6.PushFloat(2);
+    vao6.AddBuffer(vbo6, layout6);
+    ibo.Bind();
+        
+    glm::mat4 proj = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));   // aspect ratio, prespective
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0)); // camera position, orientation
         
     Shader shader("OpenGL_tutorial/basic.shader");
@@ -348,6 +280,10 @@ int main()
     Texture W("OpenGL_tutorial/abeceda/w.png");
     Texture I("OpenGL_tutorial/abeceda/i.png");
     Texture N("OpenGL_tutorial/abeceda/n.png");
+        
+    Texture texture_white("OpenGL_tutorial/white.jpg");
+    Texture texture_blue("OpenGL_tutorial/blue.png");
+    Texture texture_red("OpenGL_tutorial/red.png");
 
     texture_player.Bind();
     shader.SetUniform1i("u_Texture", 0);
@@ -365,45 +301,10 @@ int main()
     glm::vec3 translation(0.0f, 0, 0);
     
 // MAZE
-//        float wall_lines[] = {
-//             0.0f, 0.0f, 0.0f, 0.0f,
-//             0.5f, 0.0f, 1.0f, 0.0f,
-//
-//             0.0f, 0.0f, 0.0f, 0.0f,
-//            -0.5f, 0.0f, 1.0f, 0.0f,
-//
-//            -0.9f, 0.9f, 0.0f, 0.0f,
-//            -0.5f, 0.9f, 1.0f, 0.0f,
-//
-//            -0.7f, 0.7f, 0.0f, 0.0f,
-//            -0.5f, 0.7f, 1.0f, 0.0f,
-//        };
-//
-//        unsigned int indices_walls[] = {
-//            0, 1
-//        };
-//
-//        int num_of_vertices = 8;
-//        VertexArray vao_walls;
-//        VertexBuffer vbo_walls(wall_lines, 4 * num_of_vertices * sizeof(float), GL_STATIC_DRAW);
-//        VertexBufferLayout walls_layout;
-//        IndexBuffer ibo_walls(indices, num_of_vertices);
-//
-//        Texture texture_line("OpenGL_tutorial/line.jpg");
-//
-//        vao_walls.Bind();
-//        vbo_walls.Bind();
-//        walls_layout.PushFloat(2);
-//        walls_layout.PushFloat(2);
-//        vao_walls.AddBuffer(vbo_walls, walls_layout);
-//        ibo_walls.Bind();
-
+        Maze maze(644, 483);
+        
+        maze.MakeMaze();
 // END OF MAZE
-       
-        Walls walls(630, 464);
-        Walls walls2(630, 464);
-        
-        
         
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -419,58 +320,13 @@ int main()
         glm::mat4 mvp = proj * view * model;
         
         float player_triangles[] = {
-            -1.0f + (posX + 1), -1.0f + (posY + 1), 0.0f, 0.0f,
-            -0.9f + (posX + 1), -1.0f + (posY + 1), 1.0f, 0.0f,
-            -0.9f + (posX + 1), -0.9f + (posY + 1), 1.0f, 1.0f,
-            -1.0f + (posX + 1), -0.9f + (posY + 1), 0.0f, 1.0f
+            0.0f + (posX), 0.0f + (posY), 0.0f, 0.0f,
+            20.0f + (posX), 0.0f + (posY), 1.0f, 0.0f,
+            20.0f + (posX), 20.0f + (posY), 1.0f, 1.0f,
+            0.0f + (posX), 20.0f + (posY), 0.0f, 1.0f
         };
         
         shader_maze.Bind();
-        
-        // mrizka
-        shader_maze.SetUniform3f("textColor", 0.2f, 0.4f, 0.8f);
-        
-        for(int i = 70; i <= 560; i += 70)
-        {
-            for(int j = 32; j <= 392; j += 60)
-            {
-                renderer.RenderChar('#', i, j, 0.4f);
-            }
-        }
-        
-        shader_maze.SetUniform3f("textColor", 0.2f, 0.8f, 0.2f);
-        
-        // left border wall
-        for(int i = 32; i <= 448; i += 16)
-            renderer.RenderChar('#', 0, i, 0.4f);
-        
-        // right border wall
-        for(int i = 32; i <= 416; i += 16)
-            renderer.RenderChar('#', 630, i, 0.4f);
-        
-        // top border wall
-        renderer.RenderText("#####################################################", 0, 464.0f, 0.4f);
-        
-        shader_maze.SetUniform3f("textColor", 0.8f, 0.2f, 0.2f);
-        
-        walls.FillLeft(7, 9, 10);
-        walls.DrawLeft();
-        
-        shader_maze.SetUniform3f("textColor", 1.0f, 0.9f, 0.9f);
-        
-        walls2.FillTop(8, 7, 54);
-        walls2.DrawTop();
-        
-        // usable xpos pixel range -> 0.0f - 630.0f // 630 / 33 = 19
-        // usable ypos pixel range -> 2.0f - 466.0f // 464 / 25 = 18
-        
-        // # width (x) = 10
-        // # height (y) = 16
-        
-        // 6x # between
-        
-        // player width in pixels = 33.0f
-        // player height in pixels = 25.0f
         
         shader.Bind();
         
@@ -478,62 +334,63 @@ int main()
         GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * 4 * sizeof(float), player_triangles));
         
         shader.SetUniformMat4f("u_MVP", mvp);
+// MAZE
+        maze.DrawMaze(texture_white, texture_blue, vao3, ibo);
         
-        texture_player.Bind();
-        renderer.Draw(vao1, ibo, shader);
+// PLAYER AND END
+        shader.SetUniformMat4f("u_MVP", mvp);
+        model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
+        mvp = proj * view * model;
         
         texture_end.Bind();
         renderer.Draw(vao2, ibo, shader);
         
-//        texture_line.Bind();
-//        renderer.DrawWalls(vao_walls, ibo_walls, shader);
-        
+        texture_player.Bind();
+        renderer.Draw(vao1, ibo, shader);
+
         // Win
-        if(posX >= 0.81f && posY >= 0.81f)
+        if(posX >= 617.0f && posY >= 457.0f)
         {
             renderer.ClearWholeScreen();
             glfwSetKeyCallback(window, key_callback_end_state);
             
         // "YOU WIN" text
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0, 0));
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(50.0f, 0.0f, 0));
             glm::mat4 mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             Y.Bind();
-            renderer.Draw(vao3, ibo, shader);
+            renderer.Draw(vao4, ibo, shader);
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.25, 0, 0));
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(130.0f, 0.0f, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             O.Bind();
-            renderer.Draw(vao3, ibo, shader);
+            renderer.Draw(vao4, ibo, shader);
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(0.5, 0, 0));
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(210.0f, 0.0f, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             U.Bind();
-            renderer.Draw(vao3, ibo, shader);
+            renderer.Draw(vao4, ibo, shader);
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(1, 0.1, 0));
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(310.0f, 20.0f, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             W.Bind();
-            renderer.Draw(vao3, ibo, shader);
+            renderer.Draw(vao4, ibo, shader);
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(1.25, 0.1, 0));
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(390.0f, 20.0f, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             I.Bind();
-            renderer.Draw(vao3, ibo, shader);
+            renderer.Draw(vao4, ibo, shader);
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(1.5, 0.1, 0));
+            model = glm::translate(glm::mat4(1.0f), glm::vec3(470.0f, 20.0f, 0));
             mvp_text = proj * view * model;
             shader.SetUniformMat4f("u_MVP", mvp_text);
             N.Bind();
-            renderer.Draw(vao3, ibo, shader);
-            
-//            renderer.ClearWholeScreen();
-//            RenderText(shader_maze, "YOU WIN", 250.0f, 200.0f, 0.7f, glm::vec3(0.8f, 0.2f, 0.2f));
+            renderer.Draw(vao4, ibo, shader);
         }
         else
         {
@@ -541,8 +398,8 @@ int main()
         }
         
         {
-            ImGui::SliderFloat3("Translation", &translation.x, -1.0f, 1.0f);
-            ImGui::SliderFloat2("PosX", &posX, -1.0f, 0.9f);
+            ImGui::SliderFloat3("Translation", &translation.x, 0, 640.0f);
+            ImGui::SliderFloat2("PosX", &posX, 0.0f, 640.0f);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
         

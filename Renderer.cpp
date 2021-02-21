@@ -41,6 +41,19 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
     GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
+void Renderer::DrawCell(float x, float y, const VertexArray& va, const IndexBuffer& ib, Shader& shader) const
+{
+    glm::vec3 translation(x, y, 0);
+    glm::mat4 proj = glm::ortho(0.0f, static_cast<float>(640), 0.0f, static_cast<float>(480));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+    glm::mat4 mvp = proj * view * model;
+    shader.SetUniformMat4f("u_MVP", mvp);
+    
+    this->Draw(va, ib, shader);
+ 
+}
+
 void Renderer::DrawWalls(const VertexArray& va, const IndexBuffer& ib, const Shader& shader)
 {
     shader.Bind();
@@ -176,6 +189,43 @@ void Renderer::RenderText(std::string text, float x, float y, float scale)
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
     }
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Renderer::RenderChar(char letter, float x, float y, float scale)
+{
+    GLCall(glBindVertexArray(VAO));
+    
+        Character ch = Characters[letter];
+        
+        float xpos = x + ch.Bearing.x * scale;
+        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+        
+        float w = ch.Size.x * scale;
+        float h = ch.Size.y * scale;
+        // update VBO for each character
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos,     ypos,       0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 0.0f }
+        };
+        // render glyph texture over quad
+        GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
+        // set content of VBO memory
+        GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+        GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
+        
+        GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        // render quad
+        GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
+        // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
