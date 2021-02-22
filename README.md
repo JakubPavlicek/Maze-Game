@@ -3,4 +3,4 @@
 Vítejte v mojí hře
 
 Jak zatím vypadá moje hra ?
-![Screenshot](maze_scr.png)
+![Screenshot](maze_scr.jpg)
