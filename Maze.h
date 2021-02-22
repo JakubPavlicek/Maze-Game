@@ -3,9 +3,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <stack>
-#include <iostream>
-#include <string>
-#include <sstream>
 #include <cstdio>
 #include <utility>
 #include <vector>
@@ -16,12 +13,18 @@
 
 enum
 {
-    CELL_PATH_N = 0,
-    CELL_PATH_E = 1,
-    CELL_PATH_S = 2,
-    CELL_PATH_W = 3,
-    CELL_VISITED = 4,
-    UNVISITED = 5
+    CELL_PATH_N = 5,
+    CELL_PATH_E = 6,
+    CELL_PATH_S = 7,
+    CELL_PATH_W = 8,
+    CELL_VISITED = 9,
+    UNVISITED = 10
+};
+
+struct Positions
+{
+    int x;
+    int y;
 };
 
 struct Maze
@@ -33,22 +36,19 @@ struct Maze
     int m_Width, m_Height;
     
     int m_CellWidth, m_CellHeight;
+
+    std::stack<std::pair<int, int>> stack;
     
-    int VisitedCells;
+    std::vector<Positions> stack_drawN;
+    std::vector<Positions> stack_drawE;
     
-    int m_Maze[28][21];
-    
-    int maze[28][21];
+    int maze[28][22];
     
     void MakeMaze();
     
-    void DrawMaze(const Texture& texture, const Texture& texture2, const VertexArray& va, const IndexBuffer& ib);
-    
-    int GetMazeWidth() const;
-    int GetMazeHeight() const;
-    
-    int GetCellWidth() const;
-    int GetCellHeight() const;
+    void DrawMaze(const Texture& texture, const Texture& texture2,
+                  const VertexArray& va, const VertexArray& vao5, const VertexArray& vao6,
+                  const IndexBuffer& ib);
     
     Renderer renderer;
 };

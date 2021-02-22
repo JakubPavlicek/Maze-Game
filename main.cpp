@@ -168,31 +168,31 @@ int main()
     {
         
     float end_triangles[] = {
-        620.0f, 460.0f, 0.0f, 0.0f,
-        640.0f, 460.0f, 1.0f, 0.0f,
-        640.0f, 480.0f, 1.0f, 1.0f,
-        620.0f, 480.0f, 0.0f, 1.0f
+        621.0f, 460.0f, 0.0f, 0.0f,
+        641.0f, 460.0f, 1.0f, 0.0f,
+        641.0f, 480.0f, 1.0f, 1.0f,
+        621.0f, 480.0f, 0.0f, 1.0f
     };
         
-    float path_triangles[] = {
+    float cell_indices[] = {
         0.0f,  0.0f,  0.0f, 0.0f,
         20.0f, 0.0f,  1.0f, 0.0f,
         20.0f, 20.0f, 1.0f, 1.0f,
         0.0f,  20.0f, 0.0f, 1.0f
     };
         
-    float cell_triangles[] = {
-        0.0f,  0.0f,  0.0f, 0.0f,
-        20.0f, 0.0f,  1.0f, 0.0f,
-        20.0f, 3.0f, 1.0f, 1.0f,
-        0.0f,  3.0f, 0.0f, 1.0f
+    float path_indicesX[] = {
+        0.0f,  20.0f,  0.0f, 0.0f,
+        20.0f, 20.0f,  1.0f, 0.0f,
+        20.0f, 23.0f, 1.0f, 1.0f,
+        0.0f,  23.0f, 0.0f, 1.0f
     };
     
-    float cell_triangles2[] = {
-        0.0f, 0.0f,  0.0f, 0.0f,
-        3.0f, 0.0f,  1.0f, 0.0f,
-        3.0f, 20.0f, 1.0f, 1.0f,
-        0.0f, 20.0f, 0.0f, 1.0f
+    float path_indicesY[] = {
+        20.0f, 0.0f,  0.0f, 0.0f,
+        23.0f, 0.0f,  1.0f, 0.0f,
+        23.0f, 20.0f, 1.0f, 1.0f,
+        20.0f, 20.0f, 0.0f, 1.0f
     };
         
     float text_triangles[] = {
@@ -213,10 +213,10 @@ int main()
     VertexArray vao1, vao2, vao3, vao4, vao5, vao6;
     VertexBuffer vbo1(nullptr, 4 * 4 * sizeof(float), GL_DYNAMIC_DRAW);
     VertexBuffer vbo2(end_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo3(path_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo3(cell_indices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
     VertexBuffer vbo4(text_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo5(cell_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo6(cell_triangles2, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo5(path_indicesX, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo6(path_indicesY, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
     VertexBufferLayout layout1, layout2, layout3, layout4, layout5, layout6;
     IndexBuffer ibo(indices, 6);
         
@@ -303,6 +303,8 @@ int main()
 // MAZE
         Maze maze(644, 483);
         
+        std::srand((unsigned int)(std::time(0)));
+        
         maze.MakeMaze();
 // END OF MAZE
         
@@ -335,7 +337,7 @@ int main()
         
         shader.SetUniformMat4f("u_MVP", mvp);
 // MAZE
-        maze.DrawMaze(texture_white, texture_blue, vao3, ibo);
+        maze.DrawMaze(texture_white, texture_blue, vao3, vao5, vao6, ibo);
         
 // PLAYER AND END
         shader.SetUniformMat4f("u_MVP", mvp);
