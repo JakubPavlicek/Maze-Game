@@ -2,18 +2,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <cstdio>
-#include <utility>
-#include <vector>
-#include <stack>
+#include "Libraries.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-//#include FT_GLYPH_H
 
 #include "Renderer.h"
 
@@ -25,14 +17,6 @@
 #include "Texture.h"
 
 #include "Maze.h"
-
-#include "glm.hpp"
-#include "gtc/matrix_transform.hpp"
-#include "gtc/type_ptr.hpp"
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 
 static float posX = 0.0f, posY = 0.0f;
 
@@ -161,7 +145,6 @@ int main()
     printf("Renderer: %s\n", renderer);
     printf("OpenGL version supported %s\n", version);
     printf("Supported GLSL version is %s.\n", shading_language);
-    //
     
     glfwSetKeyCallback(window, key_callback);
     
@@ -292,20 +275,17 @@ int main()
         
     renderer.InitializeFreetype();
         
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
+    renderer.InitializeImGui();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init((char *)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
         
     glm::vec3 translation(0.0f, 0, 0);
     
 // MAZE
-        Maze maze(644, 483);
+    Maze maze(644, 483);
         
-        std::srand((unsigned int)(std::time(0)));
+    std::srand((unsigned int)(std::time(0)));
         
-        maze.MakeMaze();
+    maze.MakeMaze();
 // END OF MAZE
         
     /* Loop until the user closes the window */
@@ -322,13 +302,11 @@ int main()
         glm::mat4 mvp = proj * view * model;
         
         float player_triangles[] = {
-            0.0f + (posX), 0.0f + (posY), 0.0f, 0.0f,
-            20.0f + (posX), 0.0f + (posY), 1.0f, 0.0f,
+            0.0f  + (posX), 0.0f  + (posY), 0.0f, 0.0f,
+            20.0f + (posX), 0.0f  + (posY), 1.0f, 0.0f,
             20.0f + (posX), 20.0f + (posY), 1.0f, 1.0f,
-            0.0f + (posX), 20.0f + (posY), 0.0f, 1.0f
+            0.0f  + (posX), 20.0f + (posY), 0.0f, 1.0f
         };
-        
-        shader_maze.Bind();
         
         shader.Bind();
         
@@ -357,40 +335,27 @@ int main()
             glfwSetKeyCallback(window, key_callback_end_state);
             
         // "YOU WIN" text
-
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(50.0f, 0.0f, 0));
-            glm::mat4 mvp_text = proj * view * model;
-            shader.SetUniformMat4f("u_MVP", mvp_text);
+            renderer.SetLetter(50.0f, 0.0f, proj, view, shader);
             Y.Bind();
             renderer.Draw(vao4, ibo, shader);
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(130.0f, 0.0f, 0));
-            mvp_text = proj * view * model;
-            shader.SetUniformMat4f("u_MVP", mvp_text);
+            renderer.SetLetter(130.0f, 0.0f, proj, view, shader);
             O.Bind();
             renderer.Draw(vao4, ibo, shader);
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(210.0f, 0.0f, 0));
-            mvp_text = proj * view * model;
-            shader.SetUniformMat4f("u_MVP", mvp_text);
+            renderer.SetLetter(210.0f, 0.0f, proj, view, shader);
             U.Bind();
             renderer.Draw(vao4, ibo, shader);
-
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(310.0f, 20.0f, 0));
-            mvp_text = proj * view * model;
-            shader.SetUniformMat4f("u_MVP", mvp_text);
+            
+            renderer.SetLetter(310.0f, 25.0f, proj, view, shader);
             W.Bind();
             renderer.Draw(vao4, ibo, shader);
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(390.0f, 20.0f, 0));
-            mvp_text = proj * view * model;
-            shader.SetUniformMat4f("u_MVP", mvp_text);
+            renderer.SetLetter(390.0f, 25.0f, proj, view, shader);
             I.Bind();
             renderer.Draw(vao4, ibo, shader);
 
-            model = glm::translate(glm::mat4(1.0f), glm::vec3(470.0f, 20.0f, 0));
-            mvp_text = proj * view * model;
-            shader.SetUniformMat4f("u_MVP", mvp_text);
+            renderer.SetLetter(470.0f, 25.0f, proj, view, shader);
             N.Bind();
             renderer.Draw(vao4, ibo, shader);
         }

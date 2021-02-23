@@ -1,11 +1,6 @@
 #pragma once
 
-#include <cstdlib>
-#include <ctime>
-#include <stack>
-#include <cstdio>
-#include <utility>
-#include <vector>
+#include "Libraries.h"
 
 #include "Renderer.h"
 #include "Texture.h"

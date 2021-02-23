@@ -54,6 +54,13 @@ void Renderer::DrawCell(float x, float y, const VertexArray& va, const IndexBuff
  
 }
 
+void Renderer::SetLetter(float x, float y, glm::mat4 proj, glm::mat4 view, Shader& shader)
+{
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0));
+    glm::mat4 mvp_text = proj * view * model;
+    shader.SetUniformMat4f("u_MVP", mvp_text);
+}
+
 void Renderer::DrawWalls(const VertexArray& va, const IndexBuffer& ib, const Shader& shader)
 {
     shader.Bind();
@@ -150,6 +157,14 @@ int Renderer::InitializeFreetype()
     glBindVertexArray(0);
     
     return 0;
+}
+
+void Renderer::InitializeImGui()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplOpenGL3_Init((char *)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
 }
 
 void Renderer::RenderText(std::string text, float x, float y, float scale)
