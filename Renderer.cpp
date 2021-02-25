@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+static int WIDTH = 640, HEIGHT = 480;
+
 void GLClearError()
 {
     while(glGetError() != GL_NO_ERROR);

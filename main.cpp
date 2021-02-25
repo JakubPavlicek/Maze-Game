@@ -22,85 +22,127 @@ static float posX = 0.0f, posY = 0.0f;
 
 static int WIDTH = 640, HEIGHT = 480;
 
-std::pair<int, int> DisableWindowAwayPos()
+std::vector<Positions> avaibleN, avaibleE, avaibleS, avaibleW;
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if(posX < 0.0f)    { posX = 0.0f;   }
     if(posX > 620.0f)  { posX = 620.0f; }
     if(posY < 0.0f)    { posY = 0.0f;   }
     if(posY > 460.0f)  { posY = 460.0f; }
 
-    return { posX, posY };
-}
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    DisableWindowAwayPos();
-
     switch(key)
     {
-    default:
-        if(action == GLFW_PRESS || action == GLFW_REPEAT)
-            std::cout << "spatne tlacitko" << std::endl;
-        break;
-
-    case GLFW_KEY_ESCAPE:
-            exit(0);
+        default:
+            if(action == GLFW_PRESS || action == GLFW_REPEAT)
+                std::cout << "spatne tlacitko" << std::endl;
+            break;
+        
+        case GLFW_KEY_ESCAPE: exit(0);
             
-    case GLFW_KEY_UP:
-        switch(action)
-        {
-            case GLFW_PRESS:
-                std::cout << "Nahoru" << std::endl;
-                posY += 23.0f;
-                break;
-            case GLFW_REPEAT:
-                std::cout << "Nahoru - opak" << std::endl;
-                posY += 23.0f;
-                break;
-        }
-        break;
-
-    case GLFW_KEY_DOWN:
-        switch(action)
-        {
-            case GLFW_PRESS:
-                std::cout << "Dolu" << std::endl;
-                posY -= 23.0f;
-                break;
-            case GLFW_REPEAT:
-                std::cout << "Dolu - opak" << std::endl;
-                posY -= 23.0f;
-                break;
-        }
-        break;
+        case GLFW_KEY_UP:
+            switch(action)
+            {
+                case GLFW_PRESS:
+                    for(auto vec : avaibleN)
+                    {
+                        if(vec.x * 23 == posX && vec.y * 23 == posY)
+                        {
+                            posY += 23.0f;
+                            break;
+                        }
+                    }
+                    break;
+                case GLFW_REPEAT:
+                    for(auto vec : avaibleN)
+                    {
+                        if(vec.x * 23 == posX && vec.y * 23 == posY)
+                        {
+                            posY += 23.0f;
+                            break;
+                        }
+                    }
+                    break;
+            }
+            break;
             
-    case GLFW_KEY_LEFT:
-        switch(action)
-        {
-            case GLFW_PRESS:
-                std::cout << "Doleva" << std::endl;
-                posX -= 23.0f;
-                break;
-            case GLFW_REPEAT:
-                std::cout << "Doleva - opak" << std::endl;
-                posX -= 23.0f;
-                break;
-        }
-        break;
+        case GLFW_KEY_DOWN:
+            switch(action)
+            {
+                case GLFW_PRESS:
+                    for(auto vec : avaibleS)
+                    {
+                        if(vec.x * 23 == posX && vec.y * 23 == posY)
+                        {
+                            posY -= 23.0f;
+                            break;
+                        }
+                    }
+                    break;
+                case GLFW_REPEAT:
+                    for(auto vec : avaibleS)
+                    {
+                        if(vec.x * 23 == posX && vec.y * 23 == posY)
+                        {
+                            posY -= 23.0f;
+                            break;
+                        }
+                    }
+                    break;
+            }
+            break;
             
-    case GLFW_KEY_RIGHT:
-        switch(action)
-        {
-            case GLFW_PRESS:
-                std::cout << "Doprava" << std::endl;
-                posX += 23.0f;
-                break;
-            case GLFW_REPEAT:
-                std::cout << "Doprava - opak" << std::endl;
-                posX += 23.0f;
-                break;
-        }
-    break;
+        case GLFW_KEY_RIGHT:
+            switch(action)
+            {
+                case GLFW_PRESS:
+                    for(auto vec : avaibleE)
+                    {
+                        if(vec.x * 23 == posX && vec.y * 23 == posY)
+                        {
+                            posX += 23.0f;
+                            break;
+                        }
+                    }
+                    break;
+                case GLFW_REPEAT:
+                    for(auto vec : avaibleE)
+                    {
+                        if(vec.x * 23 == posX && vec.y * 23 == posY)
+                        {
+                            posX += 23.0f;
+                            break;
+                        }
+                    }
+                    break;
+            }
+            break;
+            
+        case GLFW_KEY_LEFT:
+            switch(action)
+            {
+                case GLFW_PRESS:
+                    for(auto vec : avaibleW)
+                    {
+                        if(vec.x * 23 == posX && vec.y * 23 == posY)
+                        {
+                            posX -= 23.0f;
+                            break;
+                        }
+                    }
+                    break;
+                case GLFW_REPEAT:
+                    for(auto vec : avaibleW)
+                    {
+                        if(vec.x * 23 == posX && vec.y * 23 == posY)
+                        {
+                            posX -= 23.0f;
+                            break;
+                        }
+                    }
+                    break;
+            }
+            break;
     }
 }
 
@@ -145,40 +187,38 @@ int main()
     printf("Renderer: %s\n", renderer);
     printf("OpenGL version supported %s\n", version);
     printf("Supported GLSL version is %s.\n", shading_language);
-    
-    glfwSetKeyCallback(window, key_callback);
-    
+ 
     {
         
-    float end_triangles[] = {
+    float end_vertices[] = {
         621.0f, 460.0f, 0.0f, 0.0f,
         641.0f, 460.0f, 1.0f, 0.0f,
         641.0f, 480.0f, 1.0f, 1.0f,
         621.0f, 480.0f, 0.0f, 1.0f
     };
         
-    float cell_indices[] = {
+    float cell_vertices[] = {
         0.0f,  0.0f,  0.0f, 0.0f,
         20.0f, 0.0f,  1.0f, 0.0f,
         20.0f, 20.0f, 1.0f, 1.0f,
         0.0f,  20.0f, 0.0f, 1.0f
     };
         
-    float path_indicesX[] = {
+    float path_verticesX[] = {
         0.0f,  20.0f,  0.0f, 0.0f,
         20.0f, 20.0f,  1.0f, 0.0f,
         20.0f, 23.0f, 1.0f, 1.0f,
         0.0f,  23.0f, 0.0f, 1.0f
     };
     
-    float path_indicesY[] = {
+    float path_verticesY[] = {
         20.0f, 0.0f,  0.0f, 0.0f,
         23.0f, 0.0f,  1.0f, 0.0f,
         23.0f, 20.0f, 1.0f, 1.0f,
         20.0f, 20.0f, 0.0f, 1.0f
     };
         
-    float text_triangles[] = {
+    float text_vertices[] = {
         20.0f,  160.0f, 0.0f, 0.0f,
         100.0f, 160.0f, 1.0f, 0.0f,
         100.0f, 320.0f, 1.0f, 1.0f,
@@ -195,11 +235,11 @@ int main()
         
     VertexArray vao1, vao2, vao3, vao4, vao5, vao6;
     VertexBuffer vbo1(nullptr, 4 * 4 * sizeof(float), GL_DYNAMIC_DRAW);
-    VertexBuffer vbo2(end_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo3(cell_indices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo4(text_triangles, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo5(path_indicesX, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo6(path_indicesY, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo2(end_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo3(cell_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo4(text_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo5(path_verticesX, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo6(path_verticesY, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
     VertexBufferLayout layout1, layout2, layout3, layout4, layout5, layout6;
     IndexBuffer ibo(indices, 6);
         
@@ -278,6 +318,8 @@ int main()
     renderer.InitializeImGui();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
         
+    glfwSetKeyCallback(window, key_callback);
+        
     glm::vec3 translation(0.0f, 0, 0);
     
 // MAZE
@@ -286,6 +328,12 @@ int main()
     std::srand((unsigned int)(std::time(0)));
         
     maze.MakeMaze();
+        
+    avaibleN = maze.vector_of_N_pos;
+    avaibleE = maze.vector_of_E_pos;
+    avaibleS = maze.vector_of_S_pos;
+    avaibleW = maze.vector_of_W_pos;
+        
 // END OF MAZE
         
     /* Loop until the user closes the window */

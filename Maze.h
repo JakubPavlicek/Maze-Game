@@ -8,12 +8,8 @@
 
 enum
 {
-    CELL_PATH_N = 5,
-    CELL_PATH_E = 6,
-    CELL_PATH_S = 7,
-    CELL_PATH_W = 8,
-    CELL_VISITED = 9,
-    UNVISITED = 10
+    CELL_VISITED = 2,
+    UNVISITED = 3
 };
 
 struct Positions
@@ -34,11 +30,13 @@ struct Maze
 
     std::stack<std::pair<int, int>> stack;
     
-    std::vector<Positions> stack_drawN;
-    std::vector<Positions> stack_drawE;
+    std::vector<Positions> vector_of_N_pos;
+    std::vector<Positions> vector_of_E_pos;
+    std::vector<Positions> vector_of_S_pos;
+    std::vector<Positions> vector_of_W_pos;
     
     int maze[28][22];
-    
+
     void MakeMaze();
     
     void DrawMaze(const Texture& texture, const Texture& texture2,
