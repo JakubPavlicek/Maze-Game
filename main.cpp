@@ -22,7 +22,7 @@ static float posX = 0.0f, posY = 0.0f;
 
 static int WIDTH = 640, HEIGHT = 480;
 
-static bool start = false, startButton = true, exitButton = false;
+static bool start = false, menu_state = true;
 
 std::vector<Positions> avaibleN, avaibleE, avaibleS, avaibleW;
 
@@ -154,44 +154,22 @@ void key_callback_end_state(GLFWwindow* window, int key, int scancode, int actio
         exit(0);
 }
 
-void key_callback_exitButton_true(GLFWwindow* window, int key, int scancode, int action, int mods)
+void key_callback_menu_state(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    Shader shader_maze("OpenGL_tutorial/maze.shader");
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));
-    glUniformMatrix4fv(glGetUniformLocation(shader_maze.GetShader(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
- 
-    if(key == GLFW_KEY_ENTER)
-        exit(0);
-    
-    if(key == GLFW_KEY_UP && action == GLFW_PRESS && exitButton == true)
-    {
-        startButton = true;
-        exitButton = false;
-    }
-    
-    if(key == GLFW_KEY_ESCAPE)
-        exit(0);
-       
-}
-
-void key_callback_startButton_true(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    Shader shader_maze("OpenGL_tutorial/maze.shader");
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));
-    glUniformMatrix4fv(glGetUniformLocation(shader_maze.GetShader(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    
-    if(key == GLFW_KEY_ENTER)
+    if(key == GLFW_KEY_ENTER && menu_state == true)
         start = true;
     
-    if(key == GLFW_KEY_DOWN && action == GLFW_PRESS && startButton == true)
-    {
-        exitButton = true;
-        startButton = false;
-    }
+    if(key == GLFW_KEY_ENTER && menu_state == false)
+        exit(0);
+    
+    if(key == GLFW_KEY_DOWN && action == GLFW_PRESS && menu_state == true)
+        menu_state = false;
+    
+    if(key == GLFW_KEY_UP && action == GLFW_PRESS && menu_state == false)
+        menu_state = true;
     
     if(key == GLFW_KEY_ESCAPE)
         exit(0);
-    
 }
 
 int main()
@@ -388,21 +366,21 @@ int main()
         {
             shader_maze.Bind();
                 
-            if(startButton)
+            if(menu_state)
             {
                 shader_maze.SetUniform3f("textColor", 0.8f, 0.8f, 0.2f);
                 renderer.RenderText("Start Game", 230, 300, 0.7);
                 shader_maze.SetUniform3f("textColor", 1, 1, 1);
                 renderer.RenderText("Exit Game", 237, 200, 0.7);
-                glfwSetKeyCallback(window, key_callback_startButton_true);
+                glfwSetKeyCallback(window, key_callback_menu_state);
             }
-            if(exitButton)
+            if(!menu_state)
             {
                 shader_maze.SetUniform3f("textColor", 0.8f, 0.8f, 0.2f);
                 renderer.RenderText("Exit Game", 237, 200, 0.7);
                 shader_maze.SetUniform3f("textColor", 1, 1, 1);
                 renderer.RenderText("Start Game", 230, 300, 0.7);
-                glfwSetKeyCallback(window, key_callback_exitButton_true);
+                glfwSetKeyCallback(window, key_callback_menu_state);
             }
             
         }
