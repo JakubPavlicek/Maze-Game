@@ -22,15 +22,17 @@ static float posX = 0.0f, posY = 0.0f;
 
 static int WIDTH = 640, HEIGHT = 480;
 
+static bool start = false, startButton = true, exitButton = false;
+
 std::vector<Positions> avaibleN, avaibleE, avaibleS, avaibleW;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if(posX < 0.0f)    { posX = 0.0f;   }
-    if(posX > 620.0f)  { posX = 620.0f; }
+    if(posX > 625.0f)  { posX = 620.0f; }
     if(posY < 0.0f)    { posY = 0.0f;   }
     if(posY > 460.0f)  { posY = 460.0f; }
-
+    
     switch(key)
     {
         default:
@@ -150,6 +152,46 @@ void key_callback_end_state(GLFWwindow* window, int key, int scancode, int actio
 {
     if(key == GLFW_KEY_ESCAPE || key == GLFW_KEY_ENTER || key == GLFW_KEY_SPACE)
         exit(0);
+}
+
+void key_callback_exitButton_true(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    Shader shader_maze("OpenGL_tutorial/maze.shader");
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));
+    glUniformMatrix4fv(glGetUniformLocation(shader_maze.GetShader(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+ 
+    if(key == GLFW_KEY_ENTER)
+        exit(0);
+    
+    if(key == GLFW_KEY_UP && action == GLFW_PRESS && exitButton == true)
+    {
+        startButton = true;
+        exitButton = false;
+    }
+    
+    if(key == GLFW_KEY_ESCAPE)
+        exit(0);
+       
+}
+
+void key_callback_startButton_true(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    Shader shader_maze("OpenGL_tutorial/maze.shader");
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));
+    glUniformMatrix4fv(glGetUniformLocation(shader_maze.GetShader(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    
+    if(key == GLFW_KEY_ENTER)
+        start = true;
+    
+    if(key == GLFW_KEY_DOWN && action == GLFW_PRESS && startButton == true)
+    {
+        exitButton = true;
+        startButton = false;
+    }
+    
+    if(key == GLFW_KEY_ESCAPE)
+        exit(0);
+    
 }
 
 int main()
@@ -342,84 +384,111 @@ int main()
         /* Render here */
         renderer.Clear();
         
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
-        glm::mat4 mvp = proj * view * model;
-        
-        float player_triangles[] = {
-            0.0f  + (posX), 0.0f  + (posY), 0.0f, 0.0f,
-            20.0f + (posX), 0.0f  + (posY), 1.0f, 0.0f,
-            20.0f + (posX), 20.0f + (posY), 1.0f, 1.0f,
-            0.0f  + (posX), 20.0f + (posY), 0.0f, 1.0f
-        };
-        
-        shader.Bind();
-        
-        vbo1.Bind();
-        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * 4 * sizeof(float), player_triangles));
-        
-        shader.SetUniformMat4f("u_MVP", mvp);
-// MAZE
-        maze.DrawMaze(texture_white, texture_blue, vao3, vao5, vao6, ibo);
-        
-// PLAYER AND END
-        shader.SetUniformMat4f("u_MVP", mvp);
-        model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
-        mvp = proj * view * model;
-        
-        texture_end.Bind();
-        renderer.Draw(vao2, ibo, shader);
-        
-        texture_player.Bind();
-        renderer.Draw(vao1, ibo, shader);
-
-        // Win
-        if(posX >= 617.0f && posY >= 457.0f)
+        if(!start)
         {
-            renderer.ClearWholeScreen();
-            glfwSetKeyCallback(window, key_callback_end_state);
+            shader_maze.Bind();
+                
+            if(startButton)
+            {
+                shader_maze.SetUniform3f("textColor", 0.8f, 0.8f, 0.2f);
+                renderer.RenderText("Start Game", 230, 300, 0.7);
+                shader_maze.SetUniform3f("textColor", 1, 1, 1);
+                renderer.RenderText("Exit Game", 237, 200, 0.7);
+                glfwSetKeyCallback(window, key_callback_startButton_true);
+            }
+            if(exitButton)
+            {
+                shader_maze.SetUniform3f("textColor", 0.8f, 0.8f, 0.2f);
+                renderer.RenderText("Exit Game", 237, 200, 0.7);
+                shader_maze.SetUniform3f("textColor", 1, 1, 1);
+                renderer.RenderText("Start Game", 230, 300, 0.7);
+                glfwSetKeyCallback(window, key_callback_exitButton_true);
+            }
             
-        // "YOU WIN" text
-            renderer.SetLetter(50.0f, 0.0f, proj, view, shader);
-            Y.Bind();
-            renderer.Draw(vao4, ibo, shader);
-
-            renderer.SetLetter(130.0f, 0.0f, proj, view, shader);
-            O.Bind();
-            renderer.Draw(vao4, ibo, shader);
-
-            renderer.SetLetter(210.0f, 0.0f, proj, view, shader);
-            U.Bind();
-            renderer.Draw(vao4, ibo, shader);
-            
-            renderer.SetLetter(310.0f, 25.0f, proj, view, shader);
-            W.Bind();
-            renderer.Draw(vao4, ibo, shader);
-
-            renderer.SetLetter(390.0f, 25.0f, proj, view, shader);
-            I.Bind();
-            renderer.Draw(vao4, ibo, shader);
-
-            renderer.SetLetter(470.0f, 25.0f, proj, view, shader);
-            N.Bind();
-            renderer.Draw(vao4, ibo, shader);
         }
         else
         {
-            glfwSetKeyCallback(window, key_callback);
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
+            glm::mat4 mvp = proj * view * model;
+            
+            float player_triangles[] = {
+                0.0f  + (posX), 0.0f  + (posY), 0.0f, 0.0f,
+                20.0f + (posX), 0.0f  + (posY), 1.0f, 0.0f,
+                20.0f + (posX), 20.0f + (posY), 1.0f, 1.0f,
+                0.0f  + (posX), 20.0f + (posY), 0.0f, 1.0f
+            };
+            
+            shader.Bind();
+            
+            vbo1.Bind();
+            GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * 4 * sizeof(float), player_triangles));
+            
+            shader.SetUniformMat4f("u_MVP", mvp);
+            // MAZE
+            
+            maze.DrawMaze(texture_white, texture_blue, vao3, vao5, vao6, ibo);
+            
+            // PLAYER AND END
+            shader.SetUniformMat4f("u_MVP", mvp);
+            model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
+            mvp = proj * view * model;
+            
+            texture_end.Bind();
+            renderer.Draw(vao2, ibo, shader);
+            
+            texture_player.Bind();
+            renderer.Draw(vao1, ibo, shader);
+            
+            // Win
+            if(posX >= 617.0f && posY >= 457.0f)
+            {
+                renderer.ClearWholeScreen();
+                glfwSetKeyCallback(window, key_callback_end_state);
+                
+                // "YOU WIN" text
+                renderer.SetLetter(50.0f, 0.0f, proj, view, shader);
+                Y.Bind();
+                renderer.Draw(vao4, ibo, shader);
+                
+                renderer.SetLetter(130.0f, 0.0f, proj, view, shader);
+                O.Bind();
+                renderer.Draw(vao4, ibo, shader);
+                
+                renderer.SetLetter(210.0f, 0.0f, proj, view, shader);
+                U.Bind();
+                renderer.Draw(vao4, ibo, shader);
+                
+                renderer.SetLetter(310.0f, 25.0f, proj, view, shader);
+                W.Bind();
+                renderer.Draw(vao4, ibo, shader);
+                
+                renderer.SetLetter(390.0f, 25.0f, proj, view, shader);
+                I.Bind();
+                renderer.Draw(vao4, ibo, shader);
+                
+                renderer.SetLetter(470.0f, 25.0f, proj, view, shader);
+                N.Bind();
+                renderer.Draw(vao4, ibo, shader);
+            }
+            else
+            {
+                glfwSetKeyCallback(window, key_callback);
+            }
+            
+            {
+                ImGui::SliderFloat3("Translation", &translation.x, 0, 640.0f);
+                ImGui::SliderFloat2("PosX", &posX, 0.0f, 640.0f);
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            }
+            
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            
         }
-        
-        {
-            ImGui::SliderFloat3("Translation", &translation.x, 0, 640.0f);
-            ImGui::SliderFloat2("PosX", &posX, 0.0f, 640.0f);
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        }
-        
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
