@@ -1,4 +1,3 @@
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -46,7 +45,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             switch(action)
             {
                 case GLFW_PRESS:
-                    for(auto vec : avaibleN)
+                    for(const auto& vec : avaibleN)
                     {
                         if(vec.x * 23 == posX && vec.y * 23 == posY)
                         {
@@ -56,7 +55,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                     }
                     break;
                 case GLFW_REPEAT:
-                    for(auto vec : avaibleN)
+                    for(const auto& vec : avaibleN)
                     {
                         if(vec.x * 23 == posX && vec.y * 23 == posY)
                         {
@@ -72,7 +71,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             switch(action)
             {
                 case GLFW_PRESS:
-                    for(auto vec : avaibleS)
+                    for(const auto& vec : avaibleS)
                     {
                         if(vec.x * 23 == posX && vec.y * 23 == posY)
                         {
@@ -82,7 +81,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                     }
                     break;
                 case GLFW_REPEAT:
-                    for(auto vec : avaibleS)
+                    for(const auto& vec : avaibleS)
                     {
                         if(vec.x * 23 == posX && vec.y * 23 == posY)
                         {
@@ -98,7 +97,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             switch(action)
             {
                 case GLFW_PRESS:
-                    for(auto vec : avaibleE)
+                    for(const auto& vec : avaibleE)
                     {
                         if(vec.x * 23 == posX && vec.y * 23 == posY)
                         {
@@ -108,7 +107,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                     }
                     break;
                 case GLFW_REPEAT:
-                    for(auto vec : avaibleE)
+                    for(const auto& vec : avaibleE)
                     {
                         if(vec.x * 23 == posX && vec.y * 23 == posY)
                         {
@@ -124,7 +123,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             switch(action)
             {
                 case GLFW_PRESS:
-                    for(auto vec : avaibleW)
+                    for(const auto& vec : avaibleW)
                     {
                         if(vec.x * 23 == posX && vec.y * 23 == posY)
                         {
@@ -134,7 +133,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                     }
                     break;
                 case GLFW_REPEAT:
-                    for(auto vec : avaibleW)
+                    for(const auto& vec : avaibleW)
                     {
                         if(vec.x * 23 == posX && vec.y * 23 == posY)
                         {
@@ -224,14 +223,14 @@ int main()
         0.0f,  20.0f, 0.0f, 1.0f
     };
         
-    float path_verticesX[] = {
+    float wall_verticesX[] = {
         0.0f,  20.0f,  0.0f, 0.0f,
         20.0f, 20.0f,  1.0f, 0.0f,
         20.0f, 23.0f, 1.0f, 1.0f,
         0.0f,  23.0f, 0.0f, 1.0f
     };
     
-    float path_verticesY[] = {
+    float wall_verticesY[] = {
         20.0f, 0.0f,  0.0f, 0.0f,
         23.0f, 0.0f,  1.0f, 0.0f,
         23.0f, 20.0f, 1.0f, 1.0f,
@@ -258,8 +257,8 @@ int main()
     VertexBuffer vbo2(end_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
     VertexBuffer vbo3(cell_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
     VertexBuffer vbo4(text_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo5(path_verticesX, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo6(path_verticesY, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo5(wall_verticesX, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+    VertexBuffer vbo6(wall_verticesY, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
     VertexBufferLayout layout1, layout2, layout3, layout4, layout5, layout6;
     IndexBuffer ibo(indices, 6);
         
@@ -268,52 +267,49 @@ int main()
     layout1.PushFloat(2);
     layout1.PushFloat(2);
     vao1.AddBuffer(vbo1, layout1);
-    ibo.Bind();
 
     vao2.Bind();
     vbo2.Bind();
     layout2.PushFloat(2);
     layout2.PushFloat(2);
     vao2.AddBuffer(vbo2, layout2);
-    ibo.Bind();
 
     vao3.Bind();
     vbo3.Bind();
     layout3.PushFloat(2);
     layout3.PushFloat(2);
     vao3.AddBuffer(vbo3, layout3);
-    ibo.Bind();
         
     vao4.Bind();
     vbo4.Bind();
     layout4.PushFloat(2);
     layout4.PushFloat(2);
     vao4.AddBuffer(vbo4, layout4);
-    ibo.Bind();
     
     vao5.Bind();
     vbo5.Bind();
     layout5.PushFloat(2);
     layout5.PushFloat(2);
     vao5.AddBuffer(vbo5, layout5);
-    ibo.Bind();
     
     vao6.Bind();
     vbo6.Bind();
     layout6.PushFloat(2);
     layout6.PushFloat(2);
     vao6.AddBuffer(vbo6, layout6);
-    ibo.Bind();
         
+    glm::vec3 translation(0.0f, 0, 0);
     glm::mat4 proj = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));   // aspect ratio, prespective
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0)); // camera position, orientation
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
+    glm::mat4 mvp = proj * view * model;
         
     Shader shader("OpenGL_tutorial/basic.shader");
     Shader shader_maze("OpenGL_tutorial/maze.shader");
+        
     shader_maze.Bind();
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));
     glUniformMatrix4fv(glGetUniformLocation(shader_maze.GetShader(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    shader.Bind();
         
     Texture texture_player("OpenGL_tutorial/pepega.png");
     Texture texture_end("OpenGL_tutorial/end.png");
@@ -328,9 +324,6 @@ int main()
     Texture texture_blue("OpenGL_tutorial/blue.png");
     Texture texture_red("OpenGL_tutorial/red.png");
 
-    texture_player.Bind();
-    shader.SetUniform1i("u_Texture", 0);
-
     Renderer renderer;
         
     renderer.InitializeFreetype();
@@ -339,13 +332,9 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
         
     glfwSetKeyCallback(window, key_callback);
-        
-    glm::vec3 translation(0.0f, 0, 0);
     
 // MAZE
     Maze maze(644, 483);
-        
-    std::srand((unsigned int)(std::time(0)));
         
     maze.MakeMaze();
         
@@ -355,6 +344,8 @@ int main()
     avaibleW = maze.vector_of_W_pos;
         
 // END OF MAZE
+        
+    glfwSwapInterval(0); // remove the framecap
         
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -382,16 +373,12 @@ int main()
                 renderer.RenderText("Start Game", 230, 300, 0.7);
                 glfwSetKeyCallback(window, key_callback_menu_state);
             }
-            
         }
         else
         {
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
-            
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
-            glm::mat4 mvp = proj * view * model;
             
             float player_triangles[] = {
                 0.0f  + (posX), 0.0f  + (posY), 0.0f, 0.0f,
@@ -406,15 +393,11 @@ int main()
             GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * 4 * sizeof(float), player_triangles));
             
             shader.SetUniformMat4f("u_MVP", mvp);
-            // MAZE
             
+            // MAZE
             maze.DrawMaze(texture_white, texture_blue, vao3, vao5, vao6, ibo);
             
             // PLAYER AND END
-            shader.SetUniformMat4f("u_MVP", mvp);
-            model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
-            mvp = proj * view * model;
-            
             texture_end.Bind();
             renderer.Draw(vao2, ibo, shader);
             
@@ -452,20 +435,12 @@ int main()
                 N.Bind();
                 renderer.Draw(vao4, ibo, shader);
             }
-            else
-            {
-                glfwSetKeyCallback(window, key_callback);
-            }
             
-            {
-                ImGui::SliderFloat3("Translation", &translation.x, 0, 640.0f);
-                ImGui::SliderFloat2("PosX", &posX, 0.0f, 640.0f);
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            }
-            
+            ImGui::SliderFloat3("Translation", &translation.x, 0, 640.0f);
+            ImGui::SliderFloat2("PosX", &posX, 0.0f, 640.0f);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-            
         }
         
         /* Swap front and back buffers */

@@ -3,13 +3,13 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "glm.hpp"
-#include "gtc/matrix_transform.hpp"
-#include "gtc/type_ptr.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 #include "Libraries.h"
 
@@ -42,11 +42,10 @@ public:
     void Clear() const;
     void ClearWholeScreen() const;
     void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
-    void DrawWalls(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
     void DrawCell(float x, float y, const VertexArray& va, const IndexBuffer& ib, Shader& shader) const;
-    void SetLetter(float x, float y, glm::mat4 proj, glm::mat4 view, Shader& shader);
-    void RenderText(std::string text, float x, float y, float scale);
+    void SetLetter(float x, float y, glm::mat4 proj, glm::mat4 view, Shader& shader) const;
+    void RenderText(const std::string& text, float x, float y, float scale);
     void RenderChar(char letter, float x, float y, float scale);
-    int InitializeFreetype();
-    void InitializeImGui();
+    int InitializeFreetype() const;
+    void InitializeImGui() const;
 };

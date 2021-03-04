@@ -56,23 +56,14 @@ void Renderer::DrawCell(float x, float y, const VertexArray& va, const IndexBuff
  
 }
 
-void Renderer::SetLetter(float x, float y, glm::mat4 proj, glm::mat4 view, Shader& shader)
+void Renderer::SetLetter(float x, float y, glm::mat4 proj, glm::mat4 view, Shader& shader) const
 {
     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0));
     glm::mat4 mvp_text = proj * view * model;
     shader.SetUniformMat4f("u_MVP", mvp_text);
 }
 
-void Renderer::DrawWalls(const VertexArray& va, const IndexBuffer& ib, const Shader& shader)
-{
-    shader.Bind();
-    va.Bind();
-    ib.Bind();
-    
-    GLCall(glDrawArrays(GL_LINES, 0, ib.GetCount()));
-}
-
-int Renderer::InitializeFreetype()
+int Renderer::InitializeFreetype() const
 {
     FT_Library ft;
     
@@ -161,7 +152,7 @@ int Renderer::InitializeFreetype()
     return 0;
 }
 
-void Renderer::InitializeImGui()
+void Renderer::InitializeImGui() const
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -169,7 +160,7 @@ void Renderer::InitializeImGui()
     ImGui_ImplOpenGL3_Init((char *)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
 }
 
-void Renderer::RenderText(std::string text, float x, float y, float scale)
+void Renderer::RenderText(const std::string& text, float x, float y, float scale)
 {
     GLCall(glBindVertexArray(VAO));
     

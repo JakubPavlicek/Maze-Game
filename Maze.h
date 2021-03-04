@@ -14,6 +14,10 @@ enum
 
 struct Positions
 {
+    Positions(int x, int y)
+        : x(x), y(y)
+    {}
+    
     int x;
     int y;
 };
@@ -41,7 +45,7 @@ struct Maze
     
     void DrawMaze(const Texture& texture, const Texture& texture2,
                   const VertexArray& va, const VertexArray& vao5, const VertexArray& vao6,
-                  const IndexBuffer& ib);
+                  const IndexBuffer& ib) const;
     
     Renderer renderer;
 };

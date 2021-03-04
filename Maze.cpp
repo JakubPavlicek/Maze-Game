@@ -11,8 +11,10 @@ void Maze::MakeMaze()
         }
     }
     
+    std::srand((unsigned int)(std::time(0)));
+    
 // Zacatek na pozici X = 0, Y = 0
-    stack.push(std::make_pair(0, 0));
+    stack.emplace(0, 0);
     maze[0][0] = CELL_VISITED;
     
     while(!stack.empty())
@@ -48,34 +50,34 @@ void Maze::MakeMaze()
             {
                     // North
                 case 0:
-                    stack.push(std::make_pair(x, y + 1));
+                    stack.emplace(x, y + 1);
                     maze[x][y + 1] = CELL_VISITED;
-                    vector_of_N_pos.push_back({x, y});
-                    vector_of_S_pos.push_back({x, y + 1});
+                    vector_of_N_pos.emplace_back(x, y);
+                    vector_of_S_pos.emplace_back(x, y + 1);
                     break;
                     
                     // East
                 case 1:
-                    stack.push(std::make_pair(x + 1, y));
+                    stack.emplace(x + 1, y);
                     maze[x + 1][y] = CELL_VISITED;
-                    vector_of_E_pos.push_back({x, y});
-                    vector_of_W_pos.push_back({x + 1, y});
+                    vector_of_E_pos.emplace_back(x, y);
+                    vector_of_W_pos.emplace_back(x + 1, y);
                     break;
                     
                     // South
                 case 2:
-                    stack.push(std::make_pair(x, y - 1));
+                    stack.emplace(x, y - 1);
                     maze[x][y - 1] = CELL_VISITED;
-                    vector_of_S_pos.push_back({x, y});
-                    vector_of_N_pos.push_back({x, y - 1});
+                    vector_of_S_pos.emplace_back(x, y);
+                    vector_of_N_pos.emplace_back(x, y - 1);
                     break;
                     
                     // West
                 case 3:
-                    stack.push(std::make_pair(x - 1, y));
+                    stack.emplace(x - 1, y);
                     maze[x - 1][y] = CELL_VISITED;
-                    vector_of_W_pos.push_back({x, y});
-                    vector_of_E_pos.push_back({x - 1, y});
+                    vector_of_W_pos.emplace_back(x, y);
+                    vector_of_E_pos.emplace_back(x - 1, y);
                     break;
                     
                 default:
@@ -91,20 +93,19 @@ void Maze::MakeMaze()
 }
 
 void Maze::DrawMaze(const Texture& texture, const Texture& texture2,
-                    const VertexArray& va, const VertexArray& vao5, const VertexArray& vao6,
-                    const IndexBuffer& ib)
+                    const VertexArray& va,  const VertexArray& vao5, const VertexArray& vao6,
+                    const IndexBuffer& ib)  const
 {
     Shader shader("OpenGL_tutorial/basic.shader");
     shader.Bind();
 
     texture.Bind();
     
-    for(auto pos : vector_of_N_pos)
-    {
+    for(const auto& pos : vector_of_N_pos)
         renderer.DrawCell(pos.x * 23, pos.y * 23, vao5, ib, shader);
-    }
     
-    for(auto pos : vector_of_E_pos)
+    
+    for(const auto& pos : vector_of_E_pos)
         renderer.DrawCell(pos.x * 23, pos.y * 23, vao6, ib, shader);
 
     for(int x = 0; x < m_Width / m_CellWidth; x++)
@@ -121,4 +122,5 @@ void Maze::DrawMaze(const Texture& texture, const Texture& texture2,
             }
         }
     }
+    
 }
