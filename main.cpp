@@ -38,7 +38,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             if(action == GLFW_PRESS || action == GLFW_REPEAT)
                 std::cout << "spatne tlacitko" << std::endl;
             break;
-        
+            
         case GLFW_KEY_ESCAPE: exit(0);
             
         case GLFW_KEY_UP:
@@ -202,253 +202,253 @@ int main()
     const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
     const GLubyte* version = glGetString(GL_VERSION); // version as a string
     const GLubyte* shading_language = glGetString(GL_SHADING_LANGUAGE_VERSION); // version as a string
-
+    
     printf("Renderer: %s\n", renderer);
     printf("OpenGL version supported %s\n", version);
     printf("Supported GLSL version is %s.\n", shading_language);
- 
+    
     {
         
-    float end_vertices[] = {
-        621.0f, 460.0f, 0.0f, 0.0f,
-        641.0f, 460.0f, 1.0f, 0.0f,
-        641.0f, 480.0f, 1.0f, 1.0f,
-        621.0f, 480.0f, 0.0f, 1.0f
-    };
+        float end_vertices[] = {
+            621.0f, 460.0f, 0.0f, 0.0f,
+            641.0f, 460.0f, 1.0f, 0.0f,
+            641.0f, 480.0f, 1.0f, 1.0f,
+            621.0f, 480.0f, 0.0f, 1.0f
+        };
         
-    float cell_vertices[] = {
-        0.0f,  0.0f,  0.0f, 0.0f,
-        20.0f, 0.0f,  1.0f, 0.0f,
-        20.0f, 20.0f, 1.0f, 1.0f,
-        0.0f,  20.0f, 0.0f, 1.0f
-    };
+        float cell_vertices[] = {
+            0.0f,  0.0f,  0.0f, 0.0f,
+            20.0f, 0.0f,  1.0f, 0.0f,
+            20.0f, 20.0f, 1.0f, 1.0f,
+            0.0f,  20.0f, 0.0f, 1.0f
+        };
         
-    float wall_verticesX[] = {
-        0.0f,  20.0f,  0.0f, 0.0f,
-        20.0f, 20.0f,  1.0f, 0.0f,
-        20.0f, 23.0f, 1.0f, 1.0f,
-        0.0f,  23.0f, 0.0f, 1.0f
-    };
-    
-    float wall_verticesY[] = {
-        20.0f, 0.0f,  0.0f, 0.0f,
-        23.0f, 0.0f,  1.0f, 0.0f,
-        23.0f, 20.0f, 1.0f, 1.0f,
-        20.0f, 20.0f, 0.0f, 1.0f
-    };
+        float wall_verticesX[] = {
+            0.0f,  20.0f,  0.0f, 0.0f,
+            20.0f, 20.0f,  1.0f, 0.0f,
+            20.0f, 23.0f, 1.0f, 1.0f,
+            0.0f,  23.0f, 0.0f, 1.0f
+        };
         
-    float text_vertices[] = {
-        20.0f,  160.0f, 0.0f, 0.0f,
-        100.0f, 160.0f, 1.0f, 0.0f,
-        100.0f, 320.0f, 1.0f, 1.0f,
-        20.0f,  320.0f, 0.0f, 1.0f,
-    };
-    
-    unsigned int indices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-
-    GLCall(glEnable(GL_BLEND));
-    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        float wall_verticesY[] = {
+            20.0f, 0.0f,  0.0f, 0.0f,
+            23.0f, 0.0f,  1.0f, 0.0f,
+            23.0f, 20.0f, 1.0f, 1.0f,
+            20.0f, 20.0f, 0.0f, 1.0f
+        };
         
-    VertexArray vao1, vao2, vao3, vao4, vao5, vao6;
-    VertexBuffer vbo1(nullptr, 4 * 4 * sizeof(float), GL_DYNAMIC_DRAW);
-    VertexBuffer vbo2(end_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo3(cell_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo4(text_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo5(wall_verticesX, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBuffer vbo6(wall_verticesY, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
-    VertexBufferLayout layout1, layout2, layout3, layout4, layout5, layout6;
-    IndexBuffer ibo(indices, 6);
+        float text_vertices[] = {
+            20.0f,  160.0f, 0.0f, 0.0f,
+            100.0f, 160.0f, 1.0f, 0.0f,
+            100.0f, 320.0f, 1.0f, 1.0f,
+            20.0f,  320.0f, 0.0f, 1.0f,
+        };
         
-    vao1.Bind();
-    vbo1.Bind();
-    layout1.PushFloat(2);
-    layout1.PushFloat(2);
-    vao1.AddBuffer(vbo1, layout1);
-
-    vao2.Bind();
-    vbo2.Bind();
-    layout2.PushFloat(2);
-    layout2.PushFloat(2);
-    vao2.AddBuffer(vbo2, layout2);
-
-    vao3.Bind();
-    vbo3.Bind();
-    layout3.PushFloat(2);
-    layout3.PushFloat(2);
-    vao3.AddBuffer(vbo3, layout3);
+        unsigned int indices[] = {
+            0, 1, 2,
+            2, 3, 0
+        };
         
-    vao4.Bind();
-    vbo4.Bind();
-    layout4.PushFloat(2);
-    layout4.PushFloat(2);
-    vao4.AddBuffer(vbo4, layout4);
-    
-    vao5.Bind();
-    vbo5.Bind();
-    layout5.PushFloat(2);
-    layout5.PushFloat(2);
-    vao5.AddBuffer(vbo5, layout5);
-    
-    vao6.Bind();
-    vbo6.Bind();
-    layout6.PushFloat(2);
-    layout6.PushFloat(2);
-    vao6.AddBuffer(vbo6, layout6);
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         
-    glm::vec3 translation(0.0f, 0, 0);
-    glm::mat4 proj = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));   // aspect ratio, prespective
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0)); // camera position, orientation
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
-    glm::mat4 mvp = proj * view * model;
+        VertexArray vao1, vao2, vao3, vao4, vao5, vao6;
+        VertexBuffer vbo1(nullptr, 4 * 4 * sizeof(float), GL_DYNAMIC_DRAW);
+        VertexBuffer vbo2(end_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+        VertexBuffer vbo3(cell_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+        VertexBuffer vbo4(text_vertices, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+        VertexBuffer vbo5(wall_verticesX, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+        VertexBuffer vbo6(wall_verticesY, 4 * 4 * sizeof(float), GL_STATIC_DRAW);
+        VertexBufferLayout layout1, layout2, layout3, layout4, layout5, layout6;
+        IndexBuffer ibo(indices, 6);
         
-    Shader shader("OpenGL_tutorial/basic.shader");
-    Shader shader_maze("OpenGL_tutorial/maze.shader");
+        vao1.Bind();
+        vbo1.Bind();
+        layout1.PushFloat(2);
+        layout1.PushFloat(2);
+        vao1.AddBuffer(vbo1, layout1);
         
-    shader_maze.Bind();
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));
-    glUniformMatrix4fv(glGetUniformLocation(shader_maze.GetShader(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        vao2.Bind();
+        vbo2.Bind();
+        layout2.PushFloat(2);
+        layout2.PushFloat(2);
+        vao2.AddBuffer(vbo2, layout2);
         
-    Texture texture_player("OpenGL_tutorial/pepega.png");
-    Texture texture_end("OpenGL_tutorial/end.png");
-    Texture Y("OpenGL_tutorial/abeceda/y.png");
-    Texture O("OpenGL_tutorial/abeceda/o.png");
-    Texture U("OpenGL_tutorial/abeceda/u.png");
-    Texture W("OpenGL_tutorial/abeceda/w.png");
-    Texture I("OpenGL_tutorial/abeceda/i.png");
-    Texture N("OpenGL_tutorial/abeceda/n.png");
+        vao3.Bind();
+        vbo3.Bind();
+        layout3.PushFloat(2);
+        layout3.PushFloat(2);
+        vao3.AddBuffer(vbo3, layout3);
         
-    Texture texture_white("OpenGL_tutorial/white.jpg");
-    Texture texture_blue("OpenGL_tutorial/blue.png");
-    Texture texture_red("OpenGL_tutorial/red.png");
-
-    Renderer renderer;
+        vao4.Bind();
+        vbo4.Bind();
+        layout4.PushFloat(2);
+        layout4.PushFloat(2);
+        vao4.AddBuffer(vbo4, layout4);
         
-    renderer.InitializeFreetype();
+        vao5.Bind();
+        vbo5.Bind();
+        layout5.PushFloat(2);
+        layout5.PushFloat(2);
+        vao5.AddBuffer(vbo5, layout5);
         
-    renderer.InitializeImGui();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
+        vao6.Bind();
+        vbo6.Bind();
+        layout6.PushFloat(2);
+        layout6.PushFloat(2);
+        vao6.AddBuffer(vbo6, layout6);
         
-    glfwSetKeyCallback(window, key_callback);
-    
-// MAZE
-    Maze maze(644, 483);
+        glm::vec3 translation(0.0f, 0, 0);
+        glm::mat4 proj = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));   // aspect ratio, prespective
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0)); // camera position, orientation
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation); // object position, rotation, scale
+        glm::mat4 mvp = proj * view * model;
         
-    maze.MakeMaze();
+        Shader shader("OpenGL_tutorial/basic.shader");
+        Shader shader_maze("OpenGL_tutorial/maze.shader");
         
-    avaibleN = maze.vector_of_N_pos;
-    avaibleE = maze.vector_of_E_pos;
-    avaibleS = maze.vector_of_S_pos;
-    avaibleW = maze.vector_of_W_pos;
+        shader_maze.Bind();
+        glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WIDTH), 0.0f, static_cast<float>(HEIGHT));
+        glUniformMatrix4fv(glGetUniformLocation(shader_maze.GetShader(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         
-// END OF MAZE
+        Texture texture_player("OpenGL_tutorial/pepega.png");
+        Texture texture_end("OpenGL_tutorial/end.png");
+        Texture Y("OpenGL_tutorial/abeceda/y.png");
+        Texture O("OpenGL_tutorial/abeceda/o.png");
+        Texture U("OpenGL_tutorial/abeceda/u.png");
+        Texture W("OpenGL_tutorial/abeceda/w.png");
+        Texture I("OpenGL_tutorial/abeceda/i.png");
+        Texture N("OpenGL_tutorial/abeceda/n.png");
         
-    glfwSwapInterval(0); // remove the framecap
+        Texture texture_white("OpenGL_tutorial/white.jpg");
+        Texture texture_blue("OpenGL_tutorial/blue.png");
+        Texture texture_red("OpenGL_tutorial/red.png");
         
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
-        renderer.Clear();
+        Renderer renderer;
         
-        if(!start)
+        renderer.InitializeFreetype();
+        
+        renderer.InitializeImGui();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        
+        // MAZE
+        Maze maze(644, 483);
+        
+        maze.MakeMaze();
+        
+        avaibleN = maze.vector_of_N_pos;
+        avaibleE = maze.vector_of_E_pos;
+        avaibleS = maze.vector_of_S_pos;
+        avaibleW = maze.vector_of_W_pos;
+        
+        // END OF MAZE
+        
+        glfwSwapInterval(0); // remove the framecap
+        
+        /* Loop until the user closes the window */
+        while (!glfwWindowShouldClose(window))
         {
-            shader_maze.Bind();
+            /* Render here */
+            renderer.Clear();
+            
+            if(!start)
+            {
+                shader_maze.Bind();
                 
-            if(menu_state)
-            {
-                shader_maze.SetUniform3f("textColor", 0.8f, 0.8f, 0.2f);
-                renderer.RenderText("Start Game", 230, 300, 0.7);
-                shader_maze.SetUniform3f("textColor", 1, 1, 1);
-                renderer.RenderText("Exit Game", 237, 200, 0.7);
-                glfwSetKeyCallback(window, key_callback_menu_state);
+                if(menu_state)
+                {
+                    shader_maze.SetUniform3f("textColor", 0.8f, 0.8f, 0.2f);
+                    renderer.RenderText("Start Game", 230, 300, 0.7);
+                    shader_maze.SetUniform3f("textColor", 1, 1, 1);
+                    renderer.RenderText("Exit Game", 237, 200, 0.7);
+                    glfwSetKeyCallback(window, key_callback_menu_state);
+                }
+                if(!menu_state)
+                {
+                    shader_maze.SetUniform3f("textColor", 0.8f, 0.8f, 0.2f);
+                    renderer.RenderText("Exit Game", 237, 200, 0.7);
+                    shader_maze.SetUniform3f("textColor", 1, 1, 1);
+                    renderer.RenderText("Start Game", 230, 300, 0.7);
+                    glfwSetKeyCallback(window, key_callback_menu_state);
+                }
             }
-            if(!menu_state)
+            else
             {
-                shader_maze.SetUniform3f("textColor", 0.8f, 0.8f, 0.2f);
-                renderer.RenderText("Exit Game", 237, 200, 0.7);
-                shader_maze.SetUniform3f("textColor", 1, 1, 1);
-                renderer.RenderText("Start Game", 230, 300, 0.7);
-                glfwSetKeyCallback(window, key_callback_menu_state);
+                glfwSetKeyCallback(window, key_callback);
+                
+                ImGui_ImplOpenGL3_NewFrame();
+                ImGui_ImplGlfw_NewFrame();
+                ImGui::NewFrame();
+                
+                float player_triangles[] = {
+                    0.0f  + (posX), 0.0f  + (posY), 0.0f, 0.0f,
+                    20.0f + (posX), 0.0f  + (posY), 1.0f, 0.0f,
+                    20.0f + (posX), 20.0f + (posY), 1.0f, 1.0f,
+                    0.0f  + (posX), 20.0f + (posY), 0.0f, 1.0f
+                };
+                
+                shader.Bind();
+                
+                vbo1.Bind();
+                GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * 4 * sizeof(float), player_triangles));
+                
+                shader.SetUniformMat4f("u_MVP", mvp);
+                
+                // MAZE
+                maze.DrawMaze(texture_white, texture_blue, vao3, vao5, vao6, ibo);
+                
+                // PLAYER AND END
+                texture_end.Bind();
+                renderer.Draw(vao2, ibo, shader);
+                
+                texture_player.Bind();
+                renderer.Draw(vao1, ibo, shader);
+                
+                // Win
+                if(posX >= 617.0f && posY >= 457.0f)
+                {
+                    renderer.ClearWholeScreen();
+                    glfwSetKeyCallback(window, key_callback_end_state);
+                    
+                    // "YOU WIN" text
+                    renderer.SetLetter(50.0f, 0.0f, proj, view, shader);
+                    Y.Bind();
+                    renderer.Draw(vao4, ibo, shader);
+                    
+                    renderer.SetLetter(130.0f, 0.0f, proj, view, shader);
+                    O.Bind();
+                    renderer.Draw(vao4, ibo, shader);
+                    
+                    renderer.SetLetter(210.0f, 0.0f, proj, view, shader);
+                    U.Bind();
+                    renderer.Draw(vao4, ibo, shader);
+                    
+                    renderer.SetLetter(310.0f, 25.0f, proj, view, shader);
+                    W.Bind();
+                    renderer.Draw(vao4, ibo, shader);
+                    
+                    renderer.SetLetter(390.0f, 25.0f, proj, view, shader);
+                    I.Bind();
+                    renderer.Draw(vao4, ibo, shader);
+                    
+                    renderer.SetLetter(470.0f, 25.0f, proj, view, shader);
+                    N.Bind();
+                    renderer.Draw(vao4, ibo, shader);
+                }
+                
+                ImGui::SliderFloat3("Translation", &translation.x, 0, 640.0f);
+                ImGui::SliderFloat2("PosX", &posX, 0.0f, 640.0f);
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                ImGui::Render();
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             }
+            
+            /* Swap front and back buffers */
+            glfwSwapBuffers(window);
+            
+            /* Poll for and process events */
+            glfwPollEvents();
         }
-        else
-        {
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-            
-            float player_triangles[] = {
-                0.0f  + (posX), 0.0f  + (posY), 0.0f, 0.0f,
-                20.0f + (posX), 0.0f  + (posY), 1.0f, 0.0f,
-                20.0f + (posX), 20.0f + (posY), 1.0f, 1.0f,
-                0.0f  + (posX), 20.0f + (posY), 0.0f, 1.0f
-            };
-            
-            shader.Bind();
-            
-            vbo1.Bind();
-            GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * 4 * sizeof(float), player_triangles));
-            
-            shader.SetUniformMat4f("u_MVP", mvp);
-            
-            // MAZE
-            maze.DrawMaze(texture_white, texture_blue, vao3, vao5, vao6, ibo);
-            
-            // PLAYER AND END
-            texture_end.Bind();
-            renderer.Draw(vao2, ibo, shader);
-            
-            texture_player.Bind();
-            renderer.Draw(vao1, ibo, shader);
-            
-            // Win
-            if(posX >= 617.0f && posY >= 457.0f)
-            {
-                renderer.ClearWholeScreen();
-                glfwSetKeyCallback(window, key_callback_end_state);
-                
-                // "YOU WIN" text
-                renderer.SetLetter(50.0f, 0.0f, proj, view, shader);
-                Y.Bind();
-                renderer.Draw(vao4, ibo, shader);
-                
-                renderer.SetLetter(130.0f, 0.0f, proj, view, shader);
-                O.Bind();
-                renderer.Draw(vao4, ibo, shader);
-                
-                renderer.SetLetter(210.0f, 0.0f, proj, view, shader);
-                U.Bind();
-                renderer.Draw(vao4, ibo, shader);
-                
-                renderer.SetLetter(310.0f, 25.0f, proj, view, shader);
-                W.Bind();
-                renderer.Draw(vao4, ibo, shader);
-                
-                renderer.SetLetter(390.0f, 25.0f, proj, view, shader);
-                I.Bind();
-                renderer.Draw(vao4, ibo, shader);
-                
-                renderer.SetLetter(470.0f, 25.0f, proj, view, shader);
-                N.Bind();
-                renderer.Draw(vao4, ibo, shader);
-            }
-            
-            ImGui::SliderFloat3("Translation", &translation.x, 0, 640.0f);
-            ImGui::SliderFloat2("PosX", &posX, 0.0f, 640.0f);
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        }
-        
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
-    }
     }
     
     ImGui_ImplOpenGL3_Shutdown();
