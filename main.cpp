@@ -23,7 +23,7 @@ static int WIDTH = 640, HEIGHT = 480;
 
 static bool start = false, menu_state = true;
 
-std::vector<Positions> avaibleN, avaibleE, avaibleS, avaibleW;
+static std::vector<Positions> avaibleN, avaibleE, avaibleS, avaibleW;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -42,106 +42,58 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         case GLFW_KEY_ESCAPE: exit(0);
             
         case GLFW_KEY_UP:
-            switch(action)
+            if(action == GLFW_PRESS || action == GLFW_REPEAT)
             {
-                case GLFW_PRESS:
-                    for(const auto& vec : avaibleN)
+                for(const auto& vec : avaibleN)
+                {
+                    if(vec.x * 23 == posX && vec.y * 23 == posY)
                     {
-                        if(vec.x * 23 == posX && vec.y * 23 == posY)
-                        {
-                            posY += 23.0f;
-                            break;
-                        }
+                        posY += 23.0f;
+                        break;
                     }
-                    break;
-                case GLFW_REPEAT:
-                    for(const auto& vec : avaibleN)
-                    {
-                        if(vec.x * 23 == posX && vec.y * 23 == posY)
-                        {
-                            posY += 23.0f;
-                            break;
-                        }
-                    }
-                    break;
+                }
             }
             break;
             
         case GLFW_KEY_DOWN:
-            switch(action)
+            if(action == GLFW_PRESS || action == GLFW_REPEAT)
             {
-                case GLFW_PRESS:
-                    for(const auto& vec : avaibleS)
+                for(const auto& vec : avaibleS)
+                {
+                    if(vec.x * 23 == posX && vec.y * 23 == posY)
                     {
-                        if(vec.x * 23 == posX && vec.y * 23 == posY)
-                        {
-                            posY -= 23.0f;
-                            break;
-                        }
+                        posY -= 23.0f;
+                        break;
                     }
-                    break;
-                case GLFW_REPEAT:
-                    for(const auto& vec : avaibleS)
-                    {
-                        if(vec.x * 23 == posX && vec.y * 23 == posY)
-                        {
-                            posY -= 23.0f;
-                            break;
-                        }
-                    }
-                    break;
+                }
             }
             break;
             
         case GLFW_KEY_RIGHT:
-            switch(action)
+            if(action == GLFW_PRESS || action == GLFW_REPEAT)
             {
-                case GLFW_PRESS:
-                    for(const auto& vec : avaibleE)
+                for(const auto& vec : avaibleE)
+                {
+                    if(vec.x * 23 == posX && vec.y * 23 == posY)
                     {
-                        if(vec.x * 23 == posX && vec.y * 23 == posY)
-                        {
-                            posX += 23.0f;
-                            break;
-                        }
+                        posX += 23.0f;
+                        break;
                     }
-                    break;
-                case GLFW_REPEAT:
-                    for(const auto& vec : avaibleE)
-                    {
-                        if(vec.x * 23 == posX && vec.y * 23 == posY)
-                        {
-                            posX += 23.0f;
-                            break;
-                        }
-                    }
-                    break;
+                }
             }
             break;
             
         case GLFW_KEY_LEFT:
-            switch(action)
+            if(action == GLFW_PRESS || action == GLFW_REPEAT)
             {
-                case GLFW_PRESS:
-                    for(const auto& vec : avaibleW)
+                for(const auto& vec : avaibleW)
+                {
+                    if(vec.x * 23 == posX && vec.y * 23 == posY)
                     {
-                        if(vec.x * 23 == posX && vec.y * 23 == posY)
-                        {
-                            posX -= 23.0f;
-                            break;
-                        }
+                        posX -= 23.0f;
+                        break;
                     }
-                    break;
-                case GLFW_REPEAT:
-                    for(const auto& vec : avaibleW)
-                    {
-                        if(vec.x * 23 == posX && vec.y * 23 == posY)
-                        {
-                            posX -= 23.0f;
-                            break;
-                        }
-                    }
-                    break;
+                }
             }
             break;
     }
